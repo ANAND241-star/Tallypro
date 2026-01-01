@@ -2,14 +2,26 @@
 import { GoogleGenAI } from "@google/genai";
 
 export class TallyAIService {
-  private ai: GoogleGenAI;
+  private ai: GoogleGenAI | null = null;
 
   constructor() {
-    // Fix: Always use the exact named parameter and process.env.API_KEY directly
-    this.ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const apiKey = process.env.API_KEY;
+    if (apiKey) {
+      try {
+        this.ai = new GoogleGenAI({ apiKey });
+      } catch (e) {
+        console.warn("Failed to initialize Google GenAI", e);
+      }
+    } else {
+      console.warn("Google GenAI API Key is missing. AI features will be disabled.");
+    }
   }
 
   async getProductRecommendation(userProblem: string): Promise<string> {
+    if (!this.ai) {
+      return "AI recommendations are currently unavailable (API Key missing). Please view our Products page manually.";
+    }
+
     try {
       const response = await this.ai.models.generateContent({
         model: 'gemini-2.5-flash-lite',
@@ -18,8 +30,8 @@ export class TallyAIService {
                    Suggest the best automation approach or TDL type. 
                    Keep it professional and concise. Focus on Indian MSME needs.`,
         config: {
-            systemInstruction: "You are a professional Tally Developer and Consultant. Help users solve their accounting automation problems using Tally TDL.",
-            thinkingConfig: { thinkingBudget: 0 }
+          systemInstruction: "You are a professional Tally Developer and Consultant. Help users solve their accounting automation problems using Tally TDL.",
+          thinkingConfig: { thinkingBudget: 0 }
         }
       });
       // Fix: Directly use .text property instead of calling it as a function
