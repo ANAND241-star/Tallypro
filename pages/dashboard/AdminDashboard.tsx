@@ -404,43 +404,75 @@ const AdminDashboard: React.FC = () => {
                         </div>
                       </div>
 
-                      {/* File Upload Area */}
                       <div className="border-t border-slate-200 dark:border-white/10 pt-6">
-                        <label className="text-sm font-bold text-slate-900 dark:text-white block mb-4">TDL File Upload (Required)</label>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                          {/* Main File */}
-                          <div className="p-4 border-2 border-dashed border-slate-300 dark:border-white/20 rounded-xl bg-slate-50 dark:bg-white/5 hover:border-blue-500 transition-colors">
-                            <p className="text-xs font-bold uppercase text-slate-500 mb-2">Main TDL File (.txt, .tdl, .zip)</p>
+                        <label className="text-sm font-bold text-slate-900 dark:text-white block mb-4">File Hosting (Enter Direct Links)</label>
+
+                        <div className="space-y-4">
+                          {/* Main File URL */}
+                          <div className="space-y-2">
+                            <label className="text-xs font-bold uppercase text-slate-500">Main TDL Download Link (Google Drive / Dropbox)</label>
                             <input
-                              type="file"
-                              accept=".txt,.tdl,.zip"
-                              onChange={(e) => handleFileUpload(e, 'main')}
-                              className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-blue-900/30 dark:file:text-blue-300"
+                              type="url"
+                              placeholder="e.g. https://drive.google.com/file/d/..."
+                              required={!editingId}
+                              className="w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-lg px-4 py-3 text-slate-900 dark:text-white"
+                              value={newProduct.fileData || ''}
+                              onChange={(e) => setNewProduct({ ...newProduct, fileData: e.target.value, fileName: 'External Link' })}
                             />
-                            {newProduct.fileName && (
-                              <div className="mt-2 text-xs text-green-500 flex items-center gap-1">
-                                <span>✓ Loaded:</span>
-                                <span className="truncate max-w-[150px]">{newProduct.fileName}</span>
-                                <span className="text-slate-400">({newProduct.fileSize})</span>
-                              </div>
-                            )}
+                            <p className="text-[10px] text-slate-400">Paste the sharing link of your file here.</p>
                           </div>
 
-                          {/* Demo File */}
-                          <div className="p-4 border-2 border-dashed border-slate-300 dark:border-white/20 rounded-xl bg-slate-50 dark:bg-white/5 hover:border-blue-500 transition-colors">
-                            <p className="text-xs font-bold uppercase text-slate-500 mb-2">Demo File (Optional)</p>
+                          {/* Demo File URL */}
+                          <div className="space-y-2">
+                            <label className="text-xs font-bold uppercase text-slate-500">Demo File Link (Optional)</label>
                             <input
-                              type="file"
-                              accept=".txt,.tdl,.zip"
-                              onChange={(e) => handleFileUpload(e, 'demo')}
-                              className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-slate-200 file:text-slate-700 hover:file:bg-slate-300 dark:file:bg-white/10 dark:file:text-slate-300"
+                              type="url"
+                              placeholder="e.g. https://drive.google.com/file/d/..."
+                              className="w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-lg px-4 py-3 text-slate-900 dark:text-white"
+                              value={newProduct.demoFileData || ''}
+                              onChange={(e) => setNewProduct({ ...newProduct, demoFileData: e.target.value, demoFileName: 'Demo Link' })}
                             />
-                            {newProduct.demoFileName && (
-                              <div className="mt-2 text-xs text-green-500 flex items-center gap-1">
-                                <span>✓ Loaded:</span>
-                                <span className="truncate max-w-[150px]">{newProduct.demoFileName}</span>
-                              </div>
-                            )}
+                          </div>
+                        </div>
+
+                        {/* Divider for manual upload (Hidden for now to avoid confusion as per user request) */}
+                        <div className="hidden border-t border-slate-200 dark:border-white/10 pt-6 mt-6">
+                          <label className="text-sm font-bold text-slate-900 dark:text-white block mb-4">OR Upload Directly (Optional)</label>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {/* Main File */}
+                            <div className="p-4 border-2 border-dashed border-slate-300 dark:border-white/20 rounded-xl bg-slate-50 dark:bg-white/5 hover:border-blue-500 transition-colors">
+                              <p className="text-xs font-bold uppercase text-slate-500 mb-2">Main TDL File (.txt, .tdl, .zip)</p>
+                              <input
+                                type="file"
+                                accept=".txt,.tdl,.zip"
+                                onChange={(e) => handleFileUpload(e, 'main')}
+                                className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-blue-900/30 dark:file:text-blue-300"
+                              />
+                              {newProduct.fileName && (
+                                <div className="mt-2 text-xs text-green-500 flex items-center gap-1">
+                                  <span>✓ Loaded:</span>
+                                  <span className="truncate max-w-[150px]">{newProduct.fileName}</span>
+                                  <span className="text-slate-400">({newProduct.fileSize})</span>
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Demo File */}
+                            <div className="p-4 border-2 border-dashed border-slate-300 dark:border-white/20 rounded-xl bg-slate-50 dark:bg-white/5 hover:border-blue-500 transition-colors">
+                              <p className="text-xs font-bold uppercase text-slate-500 mb-2">Demo File (Optional)</p>
+                              <input
+                                type="file"
+                                accept=".txt,.tdl,.zip"
+                                onChange={(e) => handleFileUpload(e, 'demo')}
+                                className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-slate-200 file:text-slate-700 hover:file:bg-slate-300 dark:file:bg-white/10 dark:file:text-slate-300"
+                              />
+                              {newProduct.demoFileName && (
+                                <div className="mt-2 text-xs text-green-500 flex items-center gap-1">
+                                  <span>✓ Loaded:</span>
+                                  <span className="truncate max-w-[150px]">{newProduct.demoFileName}</span>
+                                </div>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </div>
