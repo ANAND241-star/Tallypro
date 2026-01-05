@@ -159,8 +159,8 @@ const AdminDashboard: React.FC = () => {
             fileName: newProduct.fileName || 'External Link',
             fileData: mainFileUrl,
             fileSize: newProduct.fileSize || 'N/A',
-            demoFileName: newProduct.demoFileName,
-            demoFileData: demoFileUrl
+            demoFileName: newProduct.demoFileName || '',
+            demoFileData: demoFileUrl || ''
           });
           showToast("Product created successfully!", "success");
         }
