@@ -17,6 +17,7 @@ import NotFound from './pages/NotFound';
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider } from './context/AuthContext';
 import { ToastProvider } from './context/ToastContext';
+import ProtectedRoute from './components/ProtectedRoute';
 
 // Scroll to top on route change
 const ScrollToTop = () => {
@@ -60,8 +61,16 @@ const App: React.FC = () => {
                   <Route path="/signup" element={<Signup />} />
                   <Route path="/admin-login" element={<AdminLogin />} />
                   <Route path="/forgot-password" element={<ForgotPassword />} />
-                  <Route path="/dashboard" element={<UserDashboard />} />
-                  <Route path="/admin" element={<AdminDashboard />} />
+                  <Route path="/dashboard" element={
+                    <ProtectedRoute>
+                      <UserDashboard />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/admin" element={
+                    <ProtectedRoute requiredRole="admin">
+                      <AdminDashboard />
+                    </ProtectedRoute>
+                  } />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </main>
