@@ -15,7 +15,7 @@ const AdminLogin: React.FC = () => {
     e.preventDefault();
     setError('');
     setLoading(true);
-    
+
     try {
       // Explicitly request admin role
       const success = await login(email, password, 'admin');
@@ -51,8 +51,8 @@ const AdminLogin: React.FC = () => {
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label className="block text-sm font-medium text-slate-300 mb-2">Admin Email</label>
-            <input 
-              type="email" 
+            <input
+              type="email"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -61,9 +61,9 @@ const AdminLogin: React.FC = () => {
             />
           </div>
           <div>
-             <label className="block text-sm font-medium text-slate-300 mb-2">Password</label>
-            <input 
-              type="password" 
+            <label className="block text-sm font-medium text-slate-300 mb-2">Password</label>
+            <input
+              type="password"
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -72,7 +72,7 @@ const AdminLogin: React.FC = () => {
             />
           </div>
 
-          <button 
+          <button
             type="submit"
             disabled={loading}
             className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-4 rounded-xl shadow-lg shadow-red-600/30 transition-all transform hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -81,18 +81,10 @@ const AdminLogin: React.FC = () => {
           </button>
         </form>
 
-        <div className="mt-8 p-4 bg-black/30 rounded-xl text-xs text-slate-400">
-           <p className="font-bold mb-2">Demo Credentials:</p>
-           <div className="flex justify-between items-center mb-1">
-             <span>Email:</span> <code onClick={() => setEmail('anandjatt689@gmail.com')} className="cursor-pointer bg-slate-700 px-2 py-0.5 rounded text-white">anandjatt689@gmail.com</code>
-           </div>
-           <div className="flex justify-between items-center">
-             <span>Pass:</span> <code onClick={() => setPassword('Admin@123')} className="cursor-pointer bg-slate-700 px-2 py-0.5 rounded text-white">Admin@123</code>
-           </div>
-        </div>
-        
+
+
         <div className="mt-4 text-center">
-             <Link to="/login" className="text-slate-500 text-sm hover:text-white transition-colors">← Back to Customer Login</Link>
+          <Link to="/login" className="text-slate-500 text-sm hover:text-white transition-colors">← Back to Customer Login</Link>
         </div>
       </div>
     </div>
