@@ -38,6 +38,7 @@ const AdminDashboard: React.FC = () => {
     licenseType: 'Single User'
   });
   const [loadingFile, setLoadingFile] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [mainFile, setMainFile] = useState<File | null>(null);
   const [demoFile, setDemoFile] = useState<File | null>(null);
 
@@ -121,13 +122,13 @@ const AdminDashboard: React.FC = () => {
         // Upload Main File if new one selected
         if (mainFile) {
           const path = `products/${Date.now()}_${mainFile.name}`;
-          mainFileUrl = await db.uploadFile(mainFile, path);
+          mainFileUrl = await db.uploadFile(mainFile, path, (p) => setUploadProgress(p));
         }
 
         // Upload Demo File if new one selected
         if (demoFile) {
           const path = `demos/${Date.now()}_${demoFile.name}`;
-          demoFileUrl = await db.uploadFile(demoFile, path);
+          demoFileUrl = await db.uploadFile(demoFile, path, (p) => setUploadProgress(p));
         }
 
         const productData = {
@@ -185,6 +186,7 @@ const AdminDashboard: React.FC = () => {
     setNewProduct({ category: Category.GST, version: '1.0', licenseType: 'Single User' });
     setMainFile(null);
     setDemoFile(null);
+    setUploadProgress(0);
   };
 
   const handleDeleteProduct = async (id: string) => {
@@ -454,9 +456,15 @@ const AdminDashboard: React.FC = () => {
                         <button
                           type="submit"
                           disabled={loadingFile}
-                          className="w-full md:w-auto px-8 bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-green-600/20"
+                          className="w-full md:w-auto px-8 bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-green-600/20 relative overflow-hidden"
                         >
-                          {loadingFile ? 'Processing File...' : (editingId ? 'Update Product' : 'Publish Product')}
+                          <span className="relative z-10">{loadingFile ? `Uploading ${Math.round(uploadProgress)}%` : (editingId ? 'Update Product' : 'Publish Product')}</span>
+                          {loadingFile && (
+                            <div
+                              className="absolute inset-0 bg-green-800 transition-all duration-300 ease-out"
+                              style={{ width: `${uploadProgress}%` }}
+                            ></div>
+                          )}
                         </button>
                       </div>
                     </form>
