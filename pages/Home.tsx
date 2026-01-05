@@ -2,24 +2,14 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { SERVICES, TESTIMONIALS, STATS, PROBLEM_SOLUTION, TDL_PRODUCTS } from '../constants';
-import { tallyAI } from '../services/geminiService';
+
 
 const Home: React.FC = () => {
-  const [aiPrompt, setAiPrompt] = useState('');
-  const [aiResponse, setAiResponse] = useState('');
-  const [isAiLoading, setIsAiLoading] = useState(false);
 
-  const handleAiConsult = async () => {
-    if (!aiPrompt) return;
-    setIsAiLoading(true);
-    const response = await tallyAI.getProductRecommendation(aiPrompt);
-    setAiResponse(response);
-    setIsAiLoading(false);
-  };
 
   return (
     <div className="relative overflow-hidden bg-slate-50 dark:bg-dark text-slate-900 dark:text-white transition-colors duration-300">
-      
+
       {/* 1. HERO SECTION */}
       <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto flex flex-col items-center text-center">
         {/* Background Effects */}
@@ -37,16 +27,16 @@ const Home: React.FC = () => {
           <p className="max-w-2xl mx-auto text-lg text-slate-600 dark:text-slate-400 mb-10 leading-relaxed">
             Stop wasting time on manual data entry. We provide high-performance TDL solutions and expert accounting services tailored for modern Indian businesses.
           </p>
-          
+
           <div className="flex flex-col sm:flex-row justify-center gap-4 mb-20">
-            <Link 
-              to="/products" 
+            <Link
+              to="/products"
               className="px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold text-lg shadow-xl shadow-blue-600/20 transition-all hover:-translate-y-1"
             >
               Explore TDLs
             </Link>
-            <a 
-              href="https://wa.me/919876543210" 
+            <a
+              href="https://wa.me/919876543210"
               className="px-8 py-4 bg-white/50 dark:bg-white/5 hover:bg-white/80 dark:hover:bg-white/10 text-slate-900 dark:text-white border border-slate-200 dark:border-white/10 rounded-xl font-bold text-lg backdrop-blur-sm transition-all hover:-translate-y-1 flex items-center justify-center gap-2"
             >
               <span>Talk to Expert</span>
@@ -77,24 +67,24 @@ const Home: React.FC = () => {
           <h2 className="text-3xl md:text-5xl font-bold text-slate-900 dark:text-white mb-4">Why Businesses Choose Us</h2>
           <p className="text-slate-500 dark:text-slate-400 max-w-2xl mx-auto">We bridge the gap between complex accounting requirements and simple, automated workflows.</p>
         </div>
-        
+
         <div className="grid md:grid-cols-2 gap-12 items-center">
           <div className="space-y-6">
-             <h3 className="text-2xl font-bold text-red-500 dark:text-red-400 mb-6">🚫 The Old Way (Manual)</h3>
-             {PROBLEM_SOLUTION.map((item) => (
-               <div key={item.id} className="flex items-center gap-4 p-4 rounded-xl bg-red-50 dark:bg-red-500/5 border border-red-100 dark:border-red-500/10">
-                 <span className="text-slate-500 line-through decoration-red-500/50">{item.problem}</span>
-               </div>
-             ))}
+            <h3 className="text-2xl font-bold text-red-500 dark:text-red-400 mb-6">🚫 The Old Way (Manual)</h3>
+            {PROBLEM_SOLUTION.map((item) => (
+              <div key={item.id} className="flex items-center gap-4 p-4 rounded-xl bg-red-50 dark:bg-red-500/5 border border-red-100 dark:border-red-500/10">
+                <span className="text-slate-500 line-through decoration-red-500/50">{item.problem}</span>
+              </div>
+            ))}
           </div>
           <div className="space-y-6">
-             <h3 className="text-2xl font-bold text-green-600 dark:text-green-400 mb-6">✅ The TallyPro Way (Automated)</h3>
-             {PROBLEM_SOLUTION.map((item) => (
-               <div key={item.id} className="flex items-center gap-4 p-4 rounded-xl bg-green-50 dark:bg-green-500/5 border border-green-100 dark:border-green-500/10 shadow-sm dark:shadow-[0_0_30px_rgba(34,197,94,0.1)]">
-                 <span className="text-2xl">{item.icon}</span>
-                 <span className="text-slate-800 dark:text-white font-medium">{item.solution}</span>
-               </div>
-             ))}
+            <h3 className="text-2xl font-bold text-green-600 dark:text-green-400 mb-6">✅ The TallyPro Way (Automated)</h3>
+            {PROBLEM_SOLUTION.map((item) => (
+              <div key={item.id} className="flex items-center gap-4 p-4 rounded-xl bg-green-50 dark:bg-green-500/5 border border-green-100 dark:border-green-500/10 shadow-sm dark:shadow-[0_0_30px_rgba(34,197,94,0.1)]">
+                <span className="text-2xl">{item.icon}</span>
+                <span className="text-slate-800 dark:text-white font-medium">{item.solution}</span>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -111,24 +101,24 @@ const Home: React.FC = () => {
               View All Products <span className="ml-2">→</span>
             </Link>
           </div>
-          
+
           <div className="grid md:grid-cols-3 gap-8">
             {TDL_PRODUCTS.slice(0, 3).map((product) => (
               <div key={product.id} className="glass-card rounded-2xl p-6 flex flex-col h-full group relative overflow-hidden bg-white dark:bg-white/5">
                 <div className="absolute top-0 right-0 p-32 bg-blue-500/5 dark:bg-blue-500/10 blur-[80px] rounded-full group-hover:bg-blue-500/10 dark:group-hover:bg-blue-500/20 transition-all"></div>
-                
+
                 <div className="w-12 h-12 bg-blue-100 dark:bg-blue-600/20 text-blue-600 dark:text-blue-400 rounded-lg flex items-center justify-center text-2xl mb-6">
                   ⚡
                 </div>
-                
+
                 <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">{product.name}</h3>
                 <p className="text-slate-500 dark:text-slate-400 text-sm mb-6 flex-grow">{product.description}</p>
-                
+
                 <div className="pt-6 border-t border-slate-100 dark:border-white/5 flex items-center justify-between z-10">
-                   <span className="text-xl font-bold text-slate-900 dark:text-white">₹{product.price}</span>
-                   <Link to="/products" className="text-sm bg-slate-100 dark:bg-white/10 hover:bg-slate-200 dark:hover:bg-white/20 px-4 py-2 rounded-lg text-slate-700 dark:text-white font-medium transition-colors">
-                     View Details
-                   </Link>
+                  <span className="text-xl font-bold text-slate-900 dark:text-white">₹{product.price}</span>
+                  <Link to="/products" className="text-sm bg-slate-100 dark:bg-white/10 hover:bg-slate-200 dark:hover:bg-white/20 px-4 py-2 rounded-lg text-slate-700 dark:text-white font-medium transition-colors">
+                    View Details
+                  </Link>
                 </div>
               </div>
             ))}
@@ -144,11 +134,11 @@ const Home: React.FC = () => {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {SERVICES.map((service) => (
-             <div key={service.id} className="glass p-8 rounded-2xl border border-slate-200 dark:border-white/5 hover:border-blue-500/30 transition-all hover:-translate-y-2">
-               <div className="text-4xl mb-4">{service.icon}</div>
-               <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">{service.title}</h3>
-               <p className="text-slate-500 dark:text-slate-400 text-sm">{service.description}</p>
-             </div>
+            <div key={service.id} className="glass p-8 rounded-2xl border border-slate-200 dark:border-white/5 hover:border-blue-500/30 transition-all hover:-translate-y-2">
+              <div className="text-4xl mb-4">{service.icon}</div>
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">{service.title}</h3>
+              <p className="text-slate-500 dark:text-slate-400 text-sm">{service.description}</p>
+            </div>
           ))}
         </div>
       </section>
@@ -165,120 +155,52 @@ const Home: React.FC = () => {
               With 5+ years of experience in Tally customization and accounting, I understand the unique challenges of Indian MSMEs. My goal is to make your accounting invisible and automatic.
             </p>
             <div className="flex flex-wrap gap-4 justify-center md:justify-start">
-               <span className="px-4 py-2 rounded-full bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 text-xs font-mono text-blue-600 dark:text-blue-300">Certified Tally Developer</span>
-               <span className="px-4 py-2 rounded-full bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 text-xs font-mono text-cyan-600 dark:text-cyan-300">GST Expert</span>
+              <span className="px-4 py-2 rounded-full bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 text-xs font-mono text-blue-600 dark:text-blue-300">Certified Tally Developer</span>
+              <span className="px-4 py-2 rounded-full bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 text-xs font-mono text-cyan-600 dark:text-cyan-300">GST Expert</span>
             </div>
           </div>
         </div>
       </section>
 
-      {/* 7. LEAD MAGNET / AI */}
-      <section className="py-24 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative">
-        {/* Decorative background glow for AI section */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl h-64 bg-blue-500/20 blur-[100px] -z-10 rounded-full"></div>
 
-        <div className="glass p-8 md:p-12 rounded-[2rem] border border-white/20 dark:border-blue-500/20 relative overflow-hidden bg-white/40 dark:bg-slate-900/40 shadow-2xl backdrop-blur-xl">
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-cyan-400"></div>
-          
-          <div className="relative z-10 flex flex-col items-center">
-            <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-blue-500/30 text-3xl text-white">
-              ✨
-            </div>
-            
-            <h2 className="text-4xl font-bold text-slate-900 dark:text-white mb-4 tracking-tight">
-              AI Tally Consultant
-            </h2>
-            <p className="text-slate-600 dark:text-slate-300 mb-10 text-lg max-w-lg leading-relaxed">
-              Describe your accounting bottleneck. Our <span className="font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400">Gemini Flash AI</span> will recommend the perfect TDL solution instantly.
-            </p>
-            
-            <div className="w-full max-w-xl mx-auto relative group">
-              <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
-              <div className="relative flex flex-col sm:flex-row gap-3 bg-white dark:bg-slate-900 p-2 rounded-2xl border border-slate-200 dark:border-white/10 shadow-inner">
-                <input 
-                  type="text" 
-                  value={aiPrompt}
-                  onChange={(e) => setAiPrompt(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleAiConsult()}
-                  placeholder="e.g. 'I spend 4 hours matching GST data...'"
-                  className="w-full bg-transparent border-none rounded-xl px-4 py-3 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-0 text-base"
-                />
-                <button 
-                  onClick={handleAiConsult}
-                  disabled={isAiLoading}
-                  className="sm:w-auto w-full px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-bold rounded-xl transition-all shadow-lg hover:shadow-blue-500/25 flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed whitespace-nowrap"
-                >
-                  {isAiLoading ? (
-                    <>
-                       <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                       </svg>
-                       Thinking...
-                    </>
-                  ) : (
-                    <>
-                      Ask AI ⚡
-                    </>
-                  )}
-                </button>
-              </div>
-            </div>
-
-            {aiResponse && (
-              <div className="mt-10 w-full max-w-2xl animate-fade-in-up">
-                 <div className="relative bg-slate-50 dark:bg-slate-800/80 p-6 md:p-8 rounded-2xl border border-slate-200 dark:border-white/10 text-left shadow-xl">
-                    <div className="absolute -top-3 -left-3">
-                       <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-white text-lg shadow-lg">💡</div>
-                    </div>
-                    <h4 className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-3">AI Recommendation</h4>
-                    <p className="text-slate-800 dark:text-slate-200 leading-relaxed whitespace-pre-line text-lg">
-                      {aiResponse}
-                    </p>
-                 </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </section>
 
       {/* 8. TESTIMONIALS */}
       <section className="py-24 overflow-hidden">
         <h2 className="text-center text-3xl font-bold text-slate-900 dark:text-white mb-12">Trusted by Accountants & Owners</h2>
         <div className="flex flex-wrap justify-center gap-6 px-4">
-           {TESTIMONIALS.map((t) => (
-             <div key={t.id} className="w-full md:w-96 glass-card p-8 rounded-2xl bg-white dark:bg-white/5 border border-slate-200 dark:border-white/5">
-               <div className="flex text-yellow-500 mb-4">★★★★★</div>
-               <p className="text-slate-600 dark:text-slate-300 mb-6 italic">"{t.content}"</p>
-               <div className="flex items-center gap-4">
-                 <div className="w-10 h-10 bg-slate-200 dark:bg-slate-700 rounded-full flex items-center justify-center font-bold text-slate-600 dark:text-slate-400">
-                   {t.name[0]}
-                 </div>
-                 <div>
-                   <h4 className="text-slate-900 dark:text-white font-bold text-sm">{t.name}</h4>
-                   <p className="text-slate-500 text-xs">{t.role}, {t.location}</p>
-                 </div>
-               </div>
-             </div>
-           ))}
+          {TESTIMONIALS.map((t) => (
+            <div key={t.id} className="w-full md:w-96 glass-card p-8 rounded-2xl bg-white dark:bg-white/5 border border-slate-200 dark:border-white/5">
+              <div className="flex text-yellow-500 mb-4">★★★★★</div>
+              <p className="text-slate-600 dark:text-slate-300 mb-6 italic">"{t.content}"</p>
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 bg-slate-200 dark:bg-slate-700 rounded-full flex items-center justify-center font-bold text-slate-600 dark:text-slate-400">
+                  {t.name[0]}
+                </div>
+                <div>
+                  <h4 className="text-slate-900 dark:text-white font-bold text-sm">{t.name}</h4>
+                  <p className="text-slate-500 text-xs">{t.role}, {t.location}</p>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       </section>
 
       {/* 9. FINAL CTA */}
       <section className="py-24 px-4">
         <div className="max-w-5xl mx-auto rounded-[2.5rem] bg-gradient-to-b from-blue-800 to-slate-900 p-12 md:p-20 text-center border border-slate-200 dark:border-white/10 shadow-2xl relative overflow-hidden">
-           <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
-           <div className="relative z-10">
-             <h2 className="text-4xl md:text-5xl font-bold text-white mb-8">Ready to Upgrade Your Tally?</h2>
-             <div className="flex flex-col sm:flex-row justify-center gap-4">
-               <Link to="/products" className="px-10 py-4 bg-white text-blue-900 font-bold rounded-xl hover:bg-blue-50 transition-all transform hover:scale-105">
-                 Get Started
-               </Link>
-               <a href="https://wa.me/919876543210" className="px-10 py-4 bg-transparent border border-white/30 text-white font-bold rounded-xl hover:bg-white/10 transition-all">
-                 WhatsApp Enquiry
-               </a>
-             </div>
-           </div>
+          <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+          <div className="relative z-10">
+            <h2 className="text-4xl md:text-5xl font-bold text-white mb-8">Ready to Upgrade Your Tally?</h2>
+            <div className="flex flex-col sm:flex-row justify-center gap-4">
+              <Link to="/products" className="px-10 py-4 bg-white text-blue-900 font-bold rounded-xl hover:bg-blue-50 transition-all transform hover:scale-105">
+                Get Started
+              </Link>
+              <a href="https://wa.me/919876543210" className="px-10 py-4 bg-transparent border border-white/30 text-white font-bold rounded-xl hover:bg-white/10 transition-all">
+                WhatsApp Enquiry
+              </a>
+            </div>
+          </div>
         </div>
       </section>
 

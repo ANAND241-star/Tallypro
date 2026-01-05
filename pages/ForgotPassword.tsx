@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { db } from '../services/mockDatabase';
+import { dbService as db } from '../services/firebaseService';
 
 const ForgotPassword: React.FC = () => {
   const [step, setStep] = useState<1 | 2 | 3>(1); // 1: Email, 2: OTP, 3: New Password
@@ -21,20 +21,20 @@ const ForgotPassword: React.FC = () => {
     setLoading(true);
 
     try {
-        const user = await db.getUserByEmail(email);
-        if (user) {
-            // Generate Mock OTP
-            const code = Math.floor(1000 + Math.random() * 9000).toString();
-            setGeneratedOtp(code);
-            alert(`[MOCK EMAIL SERVICE]\n\nYour Verification Code is: ${code}`);
-            setStep(2);
-        } else {
-            setError("Email address not found in our records.");
-        }
+      const user = await db.getUserByEmail(email);
+      if (user) {
+        // Generate Mock OTP
+        const code = Math.floor(1000 + Math.random() * 9000).toString();
+        setGeneratedOtp(code);
+        alert(`[MOCK EMAIL SERVICE]\n\nYour Verification Code is: ${code}`);
+        setStep(2);
+      } else {
+        setError("Email address not found in our records.");
+      }
     } catch (e) {
-        setError("Network error. Please try again.");
+      setError("Network error. Please try again.");
     } finally {
-        setLoading(false);
+      setLoading(false);
     }
   };
 
@@ -42,7 +42,7 @@ const ForgotPassword: React.FC = () => {
   const handleVerifyOtp = (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    
+
     if (otp === generatedOtp) {
       setStep(3);
     } else {
@@ -69,17 +69,17 @@ const ForgotPassword: React.FC = () => {
     }
 
     try {
-        const success = await db.updatePassword(email, newPassword);
-        if (success) {
-            alert("Password updated successfully! Please login.");
-            navigate('/login');
-        } else {
-            setError("Failed to update password. Try again.");
-        }
+      const success = await db.updatePassword(email, newPassword);
+      if (success) {
+        alert("Password updated successfully! Please login.");
+        navigate('/login');
+      } else {
+        setError("Failed to update password. Try again.");
+      }
     } catch (e) {
-        setError("Network Error");
+      setError("Network Error");
     } finally {
-        setLoading(false);
+      setLoading(false);
     }
   };
 
@@ -106,8 +106,8 @@ const ForgotPassword: React.FC = () => {
           <form onSubmit={handleRequestOtp} className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Email Address</label>
-              <input 
-                type="email" 
+              <input
+                type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -115,7 +115,7 @@ const ForgotPassword: React.FC = () => {
                 placeholder="user@gmail.com"
               />
             </div>
-            <button 
+            <button
               type="submit"
               disabled={loading}
               className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg shadow-blue-500/30 transition-all transform hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -130,8 +130,8 @@ const ForgotPassword: React.FC = () => {
           <form onSubmit={handleVerifyOtp} className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Verification Code</label>
-              <input 
-                type="text" 
+              <input
+                type="text"
                 required
                 maxLength={4}
                 value={otp}
@@ -141,19 +141,19 @@ const ForgotPassword: React.FC = () => {
               />
             </div>
             <div className="flex gap-3">
-                 <button 
-                  type="button"
-                  onClick={() => setStep(1)}
-                  className="flex-1 bg-slate-200 dark:bg-white/5 text-slate-600 dark:text-slate-300 font-bold py-4 rounded-xl hover:bg-slate-300 dark:hover:bg-white/10 transition-colors"
-                >
-                  Back
-                </button>
-                <button 
-                  type="submit"
-                  className="flex-[2] bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg shadow-blue-500/30 transition-all transform hover:-translate-y-1"
-                >
-                  Verify Code
-                </button>
+              <button
+                type="button"
+                onClick={() => setStep(1)}
+                className="flex-1 bg-slate-200 dark:bg-white/5 text-slate-600 dark:text-slate-300 font-bold py-4 rounded-xl hover:bg-slate-300 dark:hover:bg-white/10 transition-colors"
+              >
+                Back
+              </button>
+              <button
+                type="submit"
+                className="flex-[2] bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg shadow-blue-500/30 transition-all transform hover:-translate-y-1"
+              >
+                Verify Code
+              </button>
             </div>
           </form>
         )}
@@ -163,8 +163,8 @@ const ForgotPassword: React.FC = () => {
           <form onSubmit={handleResetPassword} className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">New Password</label>
-              <input 
-                type="password" 
+              <input
+                type="password"
                 required
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
@@ -174,8 +174,8 @@ const ForgotPassword: React.FC = () => {
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Confirm Password</label>
-              <input 
-                type="password" 
+              <input
+                type="password"
                 required
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
@@ -183,7 +183,7 @@ const ForgotPassword: React.FC = () => {
                 placeholder="••••••••"
               />
             </div>
-            <button 
+            <button
               type="submit"
               disabled={loading}
               className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 rounded-xl shadow-lg shadow-green-600/30 transition-all transform hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed"

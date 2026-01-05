@@ -1,7 +1,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User, UserRole } from '../types';
-import { db } from '../services/mockDatabase';
+import { dbService as db } from '../services/firebaseService';
 
 interface AuthContextType {
   user: User | null;
@@ -47,7 +47,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (email: string, password = '', requiredRole: 'admin' | 'customer' = 'customer') => {
     // 1. Verify Credentials via DB (Async)
-    const dbUser = await db.verifyCredentials(email, password);
+    const dbUser = await db.login(email, password);
 
     // 2. Admin Login Flow
     if (requiredRole === 'admin') {
@@ -82,18 +82,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const userExists = await db.getUserByEmail(email);
     if (!userExists) {
       const newUser: User = {
-        id: Math.random().toString(36).substr(2, 9),
+        // id will be set by firebase uid
+        id: '',
         name: name,
         email: email,
-        password: password,
+        password: password, // Note: storing password in DB is bad practice, but keeping for compatibility with existing types. Firebase Auth handles real auth.
         role: 'customer',
         status: 'active',
         joinedAt: new Date().toISOString(),
         purchasedProducts: []
       };
-      await db.addUser(newUser);
-      setUser(newUser);
-      localStorage.setItem('tallypro_session', JSON.stringify(newUser));
+      // Use signup method which handles auth creation + firestore doc
+      const createdUser = await db.signup(newUser, password);
+      setUser(createdUser);
+      localStorage.setItem('tallypro_session', JSON.stringify(createdUser));
       return true;
     }
     return false;
