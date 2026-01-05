@@ -135,6 +135,9 @@ const AdminDashboard: React.FC = () => {
           ...newProduct,
           fileData: mainFileUrl,
           demoFileData: demoFileUrl,
+          fileName: newProduct.fileName || 'External Link',
+          fileSize: newProduct.fileSize || 'N/A',
+          demoFileName: newProduct.demoFileName || '',
           // Ensure we don't accidentally save base64 if it was ever there, though we removed that logic
         };
 
