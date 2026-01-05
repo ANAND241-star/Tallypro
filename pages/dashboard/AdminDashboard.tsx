@@ -38,6 +38,8 @@ const AdminDashboard: React.FC = () => {
     licenseType: 'Single User'
   });
   const [loadingFile, setLoadingFile] = useState(false);
+  const [mainFile, setMainFile] = useState<File | null>(null);
+  const [demoFile, setDemoFile] = useState<File | null>(null);
 
   // Fetch Data
   useEffect(() => {
@@ -79,31 +81,25 @@ const AdminDashboard: React.FC = () => {
     }
 
     setLoadingFile(true);
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const base64 = event.target?.result as string;
-      if (field === 'main') {
-        setNewProduct(prev => ({
-          ...prev,
-          fileName: file.name,
-          fileData: base64,
-          fileSize: (file.size / 1024).toFixed(2) + ' KB'
-        }));
-      } else {
-        setNewProduct(prev => ({
-          ...prev,
-          demoFileName: file.name,
-          demoFileData: base64
-        }));
-      }
-      setLoadingFile(false);
-      showToast("File loaded successfully", "success");
-    };
-    reader.onerror = () => {
-      showToast("Error reading file", "error");
-      setLoadingFile(false);
-    };
-    reader.readAsDataURL(file);
+
+    // Store raw file for upload
+    if (field === 'main') {
+      setMainFile(file);
+      setNewProduct(prev => ({
+        ...prev,
+        fileName: file.name,
+        fileSize: (file.size / 1024).toFixed(2) + ' KB'
+      }));
+    } else {
+      setDemoFile(file);
+      setNewProduct(prev => ({
+        ...prev,
+        demoFileName: file.name,
+      }));
+    }
+
+    setLoadingFile(false);
+    showToast("File selected ready for upload", "success");
   };
 
   const handleEditProduct = (product: TDLProduct) => {
@@ -117,41 +113,69 @@ const AdminDashboard: React.FC = () => {
   const handleSaveProduct = async (e: React.FormEvent) => {
     e.preventDefault();
     if (newProduct.name && newProduct.price) {
-      if (editingId) {
-        // UPDATE Existing
-        await db.updateProduct(editingId, newProduct);
-        showToast("Product updated successfully!", "success");
-      } else {
-        // CREATE New
-        await db.addProduct({
-          id: Math.random().toString(36).substr(2, 9),
-          name: newProduct.name,
-          description: newProduct.description || '',
-          price: Number(newProduct.price),
-          category: newProduct.category || Category.GST,
-          demoUrl: '#',
-          imageUrl: newProduct.imageUrl || 'https://picsum.photos/seed/' + Math.random() + '/400/300',
-          features: newProduct.features || ['Feature 1', 'Feature 2'],
-          active: true,
-          version: newProduct.version || '1.0',
-          licenseType: newProduct.licenseType || 'Single User',
-          fileName: newProduct.fileName,
-          fileData: newProduct.fileData,
-          fileSize: newProduct.fileSize,
-          demoFileName: newProduct.demoFileName,
-          demoFileData: newProduct.demoFileData
-        });
-        showToast("Product created successfully!", "success");
+      setLoadingFile(true);
+      try {
+        let mainFileUrl = newProduct.fileData; // Keep existing if not changed
+        let demoFileUrl = newProduct.demoFileData;
+
+        // Upload Main File if new one selected
+        if (mainFile) {
+          const path = `products/${Date.now()}_${mainFile.name}`;
+          mainFileUrl = await db.uploadFile(mainFile, path);
+        }
+
+        // Upload Demo File if new one selected
+        if (demoFile) {
+          const path = `demos/${Date.now()}_${demoFile.name}`;
+          demoFileUrl = await db.uploadFile(demoFile, path);
+        }
+
+        const productData = {
+          ...newProduct,
+          fileData: mainFileUrl,
+          demoFileData: demoFileUrl,
+          // Ensure we don't accidentally save base64 if it was ever there, though we removed that logic
+        };
+
+        if (editingId) {
+          // UPDATE Existing
+          await db.updateProduct(editingId, productData);
+          showToast("Product updated successfully!", "success");
+        } else {
+          // CREATE New
+          await db.addProduct({
+            id: Math.random().toString(36).substr(2, 9),
+            name: newProduct.name!,
+            description: newProduct.description || '',
+            price: Number(newProduct.price),
+            category: newProduct.category || Category.GST,
+            demoUrl: '#',
+            imageUrl: newProduct.imageUrl || 'https://picsum.photos/seed/' + Math.random() + '/400/300',
+            features: newProduct.features || ['Feature 1', 'Feature 2'],
+            active: true,
+            version: newProduct.version || '1.0',
+            licenseType: newProduct.licenseType || 'Single User',
+            fileName: newProduct.fileName,
+            fileData: mainFileUrl,
+            fileSize: newProduct.fileSize,
+            demoFileName: newProduct.demoFileName,
+            demoFileData: demoFileUrl
+          });
+          showToast("Product created successfully!", "success");
+        }
+
+        // Refresh Data
+        const updatedProducts = await db.getProducts();
+        setProducts(updatedProducts.filter(p => p.active));
+
+        // Reset Form
+        handleCancelForm();
+      } catch (error) {
+        console.error("Error saving product:", error);
+        showToast("Failed to save product. Check console.", "error");
+      } finally {
+        setLoadingFile(false);
       }
-
-      // Refresh Data
-      const updatedProducts = await db.getProducts();
-      setProducts(updatedProducts.filter(p => p.active));
-
-      // Reset Form
-      setShowProductForm(false);
-      setEditingId(null);
-      setNewProduct({ category: Category.GST, version: '1.0', licenseType: 'Single User' });
     }
   };
 
@@ -159,6 +183,8 @@ const AdminDashboard: React.FC = () => {
     setShowProductForm(false);
     setEditingId(null);
     setNewProduct({ category: Category.GST, version: '1.0', licenseType: 'Single User' });
+    setMainFile(null);
+    setDemoFile(null);
   };
 
   const handleDeleteProduct = async (id: string) => {
@@ -190,8 +216,8 @@ const AdminDashboard: React.FC = () => {
     <button
       onClick={() => setActiveTab(id)}
       className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all ${activeTab === id
-          ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30'
-          : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5'
+        ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30'
+        : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5'
         }`}
     >
       <Icon />
@@ -576,7 +602,7 @@ const AdminDashboard: React.FC = () => {
                         <td className="px-6 py-4"><span className="uppercase text-xs font-bold">{t.priority}</span></td>
                         <td className="px-6 py-4">
                           <span className={`px-2 py-1 rounded text-xs uppercase font-bold ${t.status === 'open' ? 'bg-orange-100 text-orange-600' :
-                              t.status === 'closed' ? 'bg-green-100 text-green-600' : 'bg-blue-100 text-blue-600'
+                            t.status === 'closed' ? 'bg-green-100 text-green-600' : 'bg-blue-100 text-blue-600'
                             }`}>
                             {t.status.replace('_', ' ')}
                           </span>

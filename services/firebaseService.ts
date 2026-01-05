@@ -20,7 +20,8 @@ import {
     onAuthStateChanged,
     User as FirebaseUser
 } from 'firebase/auth';
-import { auth, db } from './firebaseConfig';
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { auth, db, storage } from './firebaseConfig';
 import { User, TDLProduct, Order, Ticket } from '../types';
 
 export class FirebaseDatabaseService {
@@ -240,6 +241,19 @@ export class FirebaseDatabaseService {
     async updateTicketStatus(ticketId: string, status: 'open' | 'closed' | 'in_progress'): Promise<void> {
         const ref = doc(db, "tickets", ticketId);
         await updateDoc(ref, { status });
+    }
+
+    // --- File Upload (Storage) ---
+    async uploadFile(file: File, path: string): Promise<string> {
+        try {
+            const storageRef = ref(storage, path);
+            const snapshot = await uploadBytes(storageRef, file);
+            const downloadURL = await getDownloadURL(snapshot.ref);
+            return downloadURL;
+        } catch (error) {
+            console.error("Error uploading file:", error);
+            throw error;
+        }
     }
 }
 
