@@ -118,12 +118,16 @@ export class FirebaseDatabaseService {
         const uid = userCredential.user.uid;
 
         // 2. Create Firestore User Document
+        // 2. Create Firestore User Document
+        // SECURITY: Exclude password from Firestore document
+        const { password: _, ...safeUserData } = user;
+
         const newUser: User = {
-            ...user,
+            ...safeUserData,
             id: uid, // Use Auth UID as doc ID
             purchasedProducts: [],
             joinedAt: new Date().toISOString()
-        };
+        } as User;
 
         await setDoc(doc(db, "users", uid), newUser);
         return newUser;
