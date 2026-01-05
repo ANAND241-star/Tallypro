@@ -156,9 +156,9 @@ const AdminDashboard: React.FC = () => {
             active: true,
             version: newProduct.version || '1.0',
             licenseType: newProduct.licenseType || 'Single User',
-            fileName: newProduct.fileName,
+            fileName: newProduct.fileName || 'External Link',
             fileData: mainFileUrl,
-            fileSize: newProduct.fileSize,
+            fileSize: newProduct.fileSize || 'N/A',
             demoFileName: newProduct.demoFileName,
             demoFileData: demoFileUrl
           });
@@ -417,7 +417,7 @@ const AdminDashboard: React.FC = () => {
                               required={!editingId}
                               className="w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-lg px-4 py-3 text-slate-900 dark:text-white"
                               value={newProduct.fileData || ''}
-                              onChange={(e) => setNewProduct({ ...newProduct, fileData: e.target.value, fileName: 'External Link' })}
+                              onChange={(e) => setNewProduct({ ...newProduct, fileData: e.target.value, fileName: 'External Link', fileSize: 'N/A' })}
                             />
                             <p className="text-[10px] text-slate-400">Paste the sharing link of your file here.</p>
                           </div>
