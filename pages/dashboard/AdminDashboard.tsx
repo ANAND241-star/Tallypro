@@ -20,6 +20,7 @@ const AdminDashboard: React.FC = () => {
   const { user } = useAuth();
   const { showToast } = useToast();
   const [activeTab, setActiveTab] = useState<TabType>('analytics');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Async Data State
   const [users, setUsers] = useState<User[]>([]);
@@ -219,7 +220,7 @@ const AdminDashboard: React.FC = () => {
 
   const SidebarItem = ({ id, label, icon: Icon }: { id: TabType, label: string, icon: any }) => (
     <button
-      onClick={() => setActiveTab(id)}
+      onClick={() => { setActiveTab(id); setIsMobileMenuOpen(false); }}
       className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all ${activeTab === id
         ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30'
         : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5'
@@ -248,6 +249,30 @@ const AdminDashboard: React.FC = () => {
         </div>
       </aside>
 
+      {/* Mobile Sidebar Overlay */}
+      {isMobileMenuOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-40 md:hidden"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+
+      {/* Mobile Sidebar */}
+      <aside className={`w-64 fixed h-full pt-4 pb-20 px-4 z-50 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-white/5 md:hidden transition-transform duration-300 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+        <div className="space-y-2">
+          <SidebarItem id="analytics" label="Overview" icon={Icons.Analytics} />
+          <SidebarItem id="users" label="Users" icon={Icons.Users} />
+          <SidebarItem id="products" label="TDL Products" icon={Icons.Products} />
+          <SidebarItem id="orders" label="Orders" icon={Icons.Orders} />
+          <SidebarItem id="tickets" label="Support" icon={Icons.Tickets} />
+        </div>
+
+        <div className="absolute bottom-24 left-4 right-4 p-4 rounded-xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10">
+          <p className="text-xs text-slate-500 uppercase font-bold mb-1">Logged in as</p>
+          <p className="text-sm font-bold text-slate-900 dark:text-white truncate">{user?.email}</p>
+        </div>
+      </aside>
+
       {/* Main Content */}
       <main className="flex-1 md:ml-64 p-4 md:p-8 pb-20 overflow-y-auto min-h-screen">
         <header className="flex justify-between items-center mb-8">
@@ -256,7 +281,12 @@ const AdminDashboard: React.FC = () => {
             <p className="text-slate-500 text-sm">Real-time Data</p>
           </div>
           <div className="flex gap-2">
-            <button className="md:hidden p-2 bg-slate-200 dark:bg-white/10 rounded-lg">Menu</button>
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="md:hidden p-2 bg-slate-200 dark:bg-white/10 rounded-lg text-slate-700 dark:text-white"
+            >
+              {isMobileMenuOpen ? '✕' : '☰ Menu'}
+            </button>
           </div>
         </header>
 

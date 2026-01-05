@@ -28,7 +28,6 @@ const Footer: React.FC = () => {
             <h4 className="text-slate-900 dark:text-white font-bold mb-6 text-lg">Platform</h4>
             <ul className="space-y-4 text-slate-500 dark:text-slate-400">
               <li><Link to="/products" className="hover:text-blue-500 transition-colors">TDL Store</Link></li>
-              <li><Link to="/services" className="hover:text-blue-500 transition-colors">Services</Link></li>
               <li><Link to="/contact" className="hover:text-blue-500 transition-colors">Consultation</Link></li>
               <li><Link to="/" className="hover:text-blue-500 transition-colors">Free Tools</Link></li>
             </ul>
@@ -39,15 +38,15 @@ const Footer: React.FC = () => {
             <ul className="space-y-4 text-slate-500 dark:text-slate-400">
               <li className="flex items-center space-x-3">
                 <span className="text-blue-500">📧</span>
-                <span>hello@tallypro.in</span>
+                <span>info.g.rservies@gmail.com</span>
               </li>
               <li className="flex items-center space-x-3">
                 <span className="text-blue-500">📞</span>
-                <span>+91 98765 43210</span>
+                <span>+91 95877 42740</span>
               </li>
               <li className="flex items-center space-x-3">
                 <span className="text-blue-500">📍</span>
-                <span>Gurgaon, India</span>
+                <span>Didwana Kuchaman, Rajasthan</span>
               </li>
             </ul>
           </div>
