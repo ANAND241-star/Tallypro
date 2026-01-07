@@ -146,9 +146,7 @@ const Home: React.FC = () => {
       {/* 6. PERSONAL BRAND */}
       <section className="py-20 bg-gradient-to-r from-blue-50 to-transparent dark:from-blue-900/20 border-y border-slate-200 dark:border-white/5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center gap-12">
-          <div className="w-32 h-32 md:w-48 md:h-48 rounded-full overflow-hidden border-4 border-white dark:border-blue-500/20 shadow-xl flex-shrink-0">
-            <img src="https://picsum.photos/seed/developer/400/400" alt="Developer" className="w-full h-full object-cover" />
-          </div>
+          {/* Image Removed */}
           <div className="text-center md:text-left">
             <h2 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white mb-4">"I don’t just build TDLs. I build systems that save time and money."</h2>
             <p className="text-slate-600 dark:text-slate-400 mb-6">
@@ -191,7 +189,7 @@ const Home: React.FC = () => {
         <div className="max-w-5xl mx-auto rounded-[2.5rem] bg-gradient-to-b from-blue-800 to-slate-900 p-12 md:p-20 text-center border border-slate-200 dark:border-white/10 shadow-2xl relative overflow-hidden">
           <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
           <div className="relative z-10">
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-8">Ready to Upgrade Your Tally?</h2>
+            <h2 className="text-4xl md:text-5xl font-bold text-white mb-8">Ready to Upgrade Your TDL?</h2>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
               <Link to="/products" className="px-10 py-4 bg-white text-blue-900 font-bold rounded-xl hover:bg-blue-50 transition-all transform hover:scale-105">
                 Get Started
