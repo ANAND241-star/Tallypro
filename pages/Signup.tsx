@@ -24,8 +24,18 @@ const Signup: React.FC = () => {
             } else {
                 setError('Account already exists with this email.');
             }
-        } catch (err) {
-            setError('Registration failed. Please try again.');
+        } catch (err: any) {
+            console.error('Signup error:', err);
+            // Handle specific Firebase Auth errors
+            if (err.code === 'auth/weak-password') {
+                setError('Password should be at least 6 characters.');
+            } else if (err.code === 'auth/invalid-email') {
+                setError('Please enter a valid email address.');
+            } else if (err.message) {
+                setError(err.message);
+            } else {
+                setError('Registration failed. Please try again.');
+            }
         } finally {
             setLoading(false);
         }

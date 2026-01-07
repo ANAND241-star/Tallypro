@@ -12,9 +12,7 @@ const Footer: React.FC = () => {
               <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-cyan-500 rounded-lg flex items-center justify-center font-bold text-white">T</div>
               <span className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Tally<span className="text-blue-500">Pro</span></span>
             </div>
-            <p className="text-slate-500 dark:text-slate-400 text-base leading-relaxed max-w-sm">
-              We build intelligent TDL solutions that automate the boring stuff, so you can focus on growing your business. Trusted by 500+ Indian MSMEs.
-            </p>
+
             <div className="flex space-x-4">
               {['twitter', 'linkedin', 'instagram'].map(icon => (
                 <div key={icon} className="w-10 h-10 rounded-full bg-slate-100 dark:bg-white/5 hover:bg-blue-100 dark:hover:bg-blue-600/20 hover:text-blue-600 dark:hover:text-blue-400 flex items-center justify-center transition-all cursor-pointer border border-slate-200 dark:border-white/10 text-slate-500 dark:text-slate-400">

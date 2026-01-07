@@ -79,8 +79,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const signup = async (name: string, email: string, password: string) => {
-    const userExists = await db.getUserByEmail(email);
-    if (!userExists) {
+    try {
       const newUser: User = {
         // id will be set by firebase uid
         id: '',
@@ -92,13 +91,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         joinedAt: new Date().toISOString(),
         purchasedProducts: []
       };
+
       // Use signup method which handles auth creation + firestore doc
       const createdUser = await db.signup(newUser, password);
       setUser(createdUser);
       localStorage.setItem('tallypro_session', JSON.stringify(createdUser));
       return true;
+    } catch (error: any) {
+      if (error.code === 'auth/email-already-in-use') {
+        return false;
+      }
+      // Re-throw other errors (weak password, network, etc) so UI can show them
+      throw error;
     }
-    return false;
   };
 
   const logout = () => {
