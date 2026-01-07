@@ -89,42 +89,7 @@ const Home: React.FC = () => {
         </div>
       </section>
 
-      {/* 4. PRODUCTS PREVIEW */}
-      <section className="py-24 bg-slate-100 dark:bg-slate-900/30">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-end mb-12">
-            <div>
-              <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-2">Best-Selling TDLs</h2>
-              <p className="text-slate-500 dark:text-slate-400">Plug-and-play modules to supercharge Tally.</p>
-            </div>
-            <Link to="/products" className="hidden md:inline-flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-500 font-semibold">
-              View All Products <span className="ml-2">→</span>
-            </Link>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            {TDL_PRODUCTS.slice(0, 3).map((product) => (
-              <div key={product.id} className="glass-card rounded-2xl p-6 flex flex-col h-full group relative overflow-hidden bg-white dark:bg-white/5">
-                <div className="absolute top-0 right-0 p-32 bg-blue-500/5 dark:bg-blue-500/10 blur-[80px] rounded-full group-hover:bg-blue-500/10 dark:group-hover:bg-blue-500/20 transition-all"></div>
-
-                <div className="w-12 h-12 bg-blue-100 dark:bg-blue-600/20 text-blue-600 dark:text-blue-400 rounded-lg flex items-center justify-center text-2xl mb-6">
-                  ⚡
-                </div>
-
-                <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">{product.name}</h3>
-                <p className="text-slate-500 dark:text-slate-400 text-sm mb-6 flex-grow">{product.description}</p>
-
-                <div className="pt-6 border-t border-slate-100 dark:border-white/5 flex items-center justify-between z-10">
-                  <span className="text-xl font-bold text-slate-900 dark:text-white">₹{product.price}</span>
-                  <Link to="/products" className="text-sm bg-slate-100 dark:bg-white/10 hover:bg-slate-200 dark:hover:bg-white/20 px-4 py-2 rounded-lg text-slate-700 dark:text-white font-medium transition-colors">
-                    View Details
-                  </Link>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* 4. PRODUCTS PREVIEW SECTION REMOVED */}
 
       {/* 5. SERVICES SECTION */}
       <section className="py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

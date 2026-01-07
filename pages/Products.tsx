@@ -5,6 +5,7 @@ import { Category, TDLProduct } from '../types';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { dbService as db } from '../services/firebaseService';
+import { openCheckout } from '../services/razorpayService';
 
 const Products: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<Category | 'All'>('All');
@@ -46,20 +47,31 @@ const Products: React.FC = () => {
       return;
     }
 
-    // Simulate Payment Process
-    const confirmed = confirm(`Confirm purchase of ${product.name} for ₹${product.price}?`);
-    if (confirmed) {
-      setPurchasingId(product.id);
-      const updatedUser = await db.createOrder(user.id, product);
-      if (updatedUser) {
-        await refreshUser();
-        showToast("Purchase Successful! Download available in Dashboard.", "success");
-        navigate('/dashboard');
-      } else {
-        showToast("Purchase failed. Please contact support.", "error");
+    // Razorpay Checkout
+    setPurchasingId(product.id);
+
+    await openCheckout(
+      product,
+      user,
+      async (paymentId) => {
+        // Payment Success Hander
+        const updatedUser = await db.createOrder(user.id, product);
+        if (updatedUser) {
+          await refreshUser();
+          showToast(`Purchase Successful! Ref: ${paymentId}`, "success");
+          navigate('/dashboard');
+        } else {
+          showToast("Payment success but order creation failed. Contact support.", "error");
+        }
+        setPurchasingId(null);
+      },
+      (error) => {
+        // Payment Failure Handler
+        console.error("Payment failed", error);
+        showToast(error.description || "Payment failed", "error");
+        setPurchasingId(null);
       }
-      setPurchasingId(null);
-    }
+    );
   };
 
   return (
