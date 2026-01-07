@@ -80,8 +80,8 @@ const Products: React.FC = () => {
             key={cat}
             onClick={() => setSelectedCategory(cat as any)}
             className={`px-5 py-2 rounded-full text-sm font-semibold transition-all border ${selectedCategory === cat
-                ? 'bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-500/25'
-                : 'bg-white dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10'
+              ? 'bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-500/25'
+              : 'bg-white dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10'
               }`}
           >
             {cat}
@@ -127,16 +127,25 @@ const Products: React.FC = () => {
                       <span className="text-2xl font-bold text-slate-900 dark:text-white">₹{p.price.toLocaleString('en-IN')}</span>
                     </div>
                     <div className="flex gap-2">
-                      <button className="p-3 rounded-xl bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-900 dark:text-white transition-colors border border-slate-200 dark:border-white/10">
-                        <span className="sr-only">Demo</span>
-                        📺
-                      </button>
+                      {p.youtubeUrl && (
+                        <a
+                          href={p.youtubeUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="p-3 rounded-xl bg-red-50 dark:bg-red-500/10 hover:bg-red-100 dark:hover:bg-red-500/20 text-red-600 dark:text-red-400 transition-colors border border-red-200 dark:border-red-500/20 flex items-center justify-center"
+                          title="Watch Demo"
+                        >
+                          <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                            <path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z" />
+                          </svg>
+                        </a>
+                      )}
                       <button
                         onClick={() => handleBuyNow(p)}
                         disabled={purchasingId === p.id}
                         className={`px-5 py-3 rounded-xl font-bold text-sm shadow-lg transition-all ${isOwned
-                            ? 'bg-green-600 hover:bg-green-500 text-white shadow-green-600/20'
-                            : 'bg-blue-600 hover:bg-blue-500 text-white shadow-blue-600/20 disabled:opacity-70 disabled:cursor-wait'
+                          ? 'bg-green-600 hover:bg-green-500 text-white shadow-green-600/20'
+                          : 'bg-blue-600 hover:bg-blue-500 text-white shadow-blue-600/20 disabled:opacity-70 disabled:cursor-wait'
                           }`}
                       >
                         {purchasingId === p.id ? 'Processing...' : (isOwned ? 'Owned ✓' : 'Buy Now')}

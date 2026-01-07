@@ -156,6 +156,7 @@ const AdminDashboard: React.FC = () => {
             category: newProduct.category || Category.GST,
             demoUrl: '#',
             imageUrl: newProduct.imageUrl || 'https://picsum.photos/seed/' + Math.random() + '/400/300',
+            youtubeUrl: newProduct.youtubeUrl || '',
             features: newProduct.features || ['Feature 1', 'Feature 2'],
             active: true,
             version: newProduct.version || '1.0',
@@ -403,6 +404,26 @@ const AdminDashboard: React.FC = () => {
                           className="w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-lg px-4 py-3 text-slate-900 dark:text-white h-24"
                           value={newProduct.description || ''} onChange={e => setNewProduct({ ...newProduct, description: e.target.value })}
                         />
+                      </div>
+
+                      {/* Image & Video Links */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <label className="text-xs font-bold uppercase text-slate-500">Image URL</label>
+                          <input
+                            type="url" placeholder="https://..."
+                            className="w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-lg px-4 py-3 text-slate-900 dark:text-white"
+                            value={newProduct.imageUrl || ''} onChange={e => setNewProduct({ ...newProduct, imageUrl: e.target.value })}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-xs font-bold uppercase text-slate-500">YouTube Video URL</label>
+                          <input
+                            type="url" placeholder="https://youtube.com/watch?v=..."
+                            className="w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-lg px-4 py-3 text-slate-900 dark:text-white"
+                            value={newProduct.youtubeUrl || ''} onChange={e => setNewProduct({ ...newProduct, youtubeUrl: e.target.value })}
+                          />
+                        </div>
                       </div>
 
                       {/* Pricing & Category */}

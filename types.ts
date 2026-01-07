@@ -17,9 +17,10 @@ export interface TDLProduct {
   category: Category;
   demoUrl: string;
   imageUrl: string;
+  youtubeUrl?: string;
   features: string[];
   active: boolean; // For soft delete/hiding
-  
+
   // File Management
   version?: string;
   licenseType?: LicenseType;
