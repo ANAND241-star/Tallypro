@@ -37,33 +37,53 @@ export const openCheckout = async (
         return;
     }
 
+    const key = import.meta.env.VITE_RAZORPAY_KEY_ID;
+    console.log("Initializing Razorpay with Key:", key ? "Key Found" : "Key Missing");
+
+    if (!key) {
+        alert("Razorpay Key ID is missing! Check .env file.");
+        return;
+    }
+
     const options = {
-        key: import.meta.env.VITE_RAZORPAY_KEY_ID, // Enter the Key ID generated from the Dashboard
-        amount: product.price * 100, // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
+        key: key,
+        amount: product.price * 100,
         currency: "INR",
         name: "TallyPro Solutions",
         description: `Purchase ${product.name}`,
-        image: "https://example.com/your_logo", // You can replace this with your logo URL
+        image: "https://example.com/your_logo",
         handler: function (response: any) {
-            // Validate payment_id if needed on server
+            console.log("Payment Success:", response);
             onSuccess(response.razorpay_payment_id);
         },
         prefill: {
             name: user.name,
             email: user.email,
-            contact: "" // Can be added if available in user object
+            contact: ""
         },
         notes: {
             address: "TallyPro Corporate Office"
         },
         theme: {
             color: "#3399cc"
+        },
+        modal: {
+            ondismiss: function () {
+                console.log("Checkout modal closed");
+            }
         }
     };
 
-    const paymentObject = new window.Razorpay(options);
-    paymentObject.on('payment.failed', function (response: any) {
-        onFailure(response.error);
-    });
-    paymentObject.open();
+    try {
+        const paymentObject = new window.Razorpay(options);
+        paymentObject.on('payment.failed', function (response: any) {
+            console.error("Payment Failed Event:", response.error);
+            onFailure(response.error);
+        });
+        console.log("Opening Razorpay Checkout...");
+        paymentObject.open();
+    } catch (err) {
+        console.error("Error creating Razorpay instance:", err);
+        alert("Failed to open payment gateway. Check console.");
+    }
 };
