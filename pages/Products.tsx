@@ -39,9 +39,8 @@ const Products: React.FC = () => {
       return;
     }
 
-    // Check if already owned
-    const currentUser = await db.getUserByEmail(user.email);
-    if (currentUser?.purchasedProducts?.includes(product.id)) {
+    // Check if already owned using local user context (avoids DB permission issues)
+    if (user.purchasedProducts?.includes(product.id)) {
       showToast("You already own this product!", "info");
       navigate('/dashboard');
       return;
