@@ -37,7 +37,7 @@ export const openCheckout = async (
         return;
     }
 
-    const key = import.meta.env.VITE_RAZORPAY_KEY_ID;
+    const key = import.meta.env.VITE_RAZORPAY_KEY_ID?.trim();
     console.log("Initializing Razorpay with Key:", key ? "Key Found" : "Key Missing");
 
     if (!key) {
