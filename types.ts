@@ -93,3 +93,8 @@ export interface Ticket {
   priority: 'low' | 'medium' | 'high';
   createdAt: string;
 }
+
+export interface CartItem {
+  product: TDLProduct;
+  quantity: number;
+}
