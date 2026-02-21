@@ -51,7 +51,7 @@ const Footer: React.FC = () => {
         </div>
 
         <div className="pt-8 border-t border-slate-200 dark:border-white/5 flex flex-col md:flex-row justify-between items-center text-slate-500 text-sm">
-          <p>© {new Date().getFullYear()} TallyPro Solutions.</p>
+          <p>© {new Date().getFullYear()} AndurilTech.</p>
           <div className="flex space-x-6 mt-4 md:mt-0">
             <span className="hover:text-slate-900 dark:hover:text-white cursor-pointer">Privacy Policy</span>
             <span className="hover:text-slate-900 dark:hover:text-white cursor-pointer">Terms of Service</span>

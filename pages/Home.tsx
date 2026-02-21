@@ -78,7 +78,7 @@ const Home: React.FC = () => {
             ))}
           </div>
           <div className="space-y-6">
-            <h3 className="text-2xl font-bold text-green-600 dark:text-green-400 mb-6">✅ The TallyPro Way (Automated)</h3>
+            <h3 className="text-2xl font-bold text-green-600 dark:text-green-400 mb-6">✅ The AndurilTech Way (Automated)</h3>
             {PROBLEM_SOLUTION.map((item) => (
               <div key={item.id} className="flex items-center gap-4 p-4 rounded-xl bg-green-50 dark:bg-green-500/5 border border-green-100 dark:border-green-500/10 shadow-sm dark:shadow-[0_0_30px_rgba(34,197,94,0.1)]">
                 <span className="text-2xl">{item.icon}</span>

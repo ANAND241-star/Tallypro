@@ -88,7 +88,7 @@ export const TESTIMONIALS: Testimonial[] = [
     name: 'Anjali Gupta',
     role: 'Director, Gupta Textiles',
     location: 'Surat',
-    content: 'TallyPro custom dashboard gives me insights I never had before. The WhatsApp tool is a game changer.',
+    content: 'AndurilTech custom dashboard gives me insights I never had before. The WhatsApp tool is a game changer.',
     rating: 5
   },
   {
@@ -109,28 +109,28 @@ export const STATS: Stat[] = [
 ];
 
 export const PROBLEM_SOLUTION: ProblemSolution[] = [
-  { 
-    id: 'ps1', 
-    problem: 'Manual Data Entry Errors', 
-    solution: 'Automated Imports & Validation', 
-    icon: '📝' 
+  {
+    id: 'ps1',
+    problem: 'Manual Data Entry Errors',
+    solution: 'Automated Imports & Validation',
+    icon: '📝'
   },
-  { 
-    id: 'ps2', 
-    problem: 'Delayed Reporting', 
-    solution: 'Real-time Dashboards', 
-    icon: '⏱️' 
+  {
+    id: 'ps2',
+    problem: 'Delayed Reporting',
+    solution: 'Real-time Dashboards',
+    icon: '⏱️'
   },
-  { 
-    id: 'ps3', 
-    problem: 'Chasing Payments', 
-    solution: 'Auto-WhatsApp Reminders', 
-    icon: '💸' 
+  {
+    id: 'ps3',
+    problem: 'Chasing Payments',
+    solution: 'Auto-WhatsApp Reminders',
+    icon: '💸'
   },
-  { 
-    id: 'ps4', 
-    problem: 'Complex GST Filing', 
-    solution: '1-Click JSON Generation', 
-    icon: '🏛️' 
+  {
+    id: 'ps4',
+    problem: 'Complex GST Filing',
+    solution: '1-Click JSON Generation',
+    icon: '🏛️'
   }
 ];

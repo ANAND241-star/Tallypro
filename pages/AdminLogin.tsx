@@ -57,7 +57,7 @@ const AdminLogin: React.FC = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full bg-black/30 border border-slate-600 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-red-500 transition-colors"
-              placeholder="admin@tallypro.in"
+              placeholder="admin@anduriltech.in"
             />
           </div>
           <div>
