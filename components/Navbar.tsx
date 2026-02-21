@@ -59,10 +59,10 @@ const Navbar: React.FC = () => {
           <div className="flex items-center">
             <Link to="/" className="flex items-center space-x-2 group">
               <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-cyan-500 rounded-xl flex items-center justify-center font-bold text-xl text-white shadow-lg shadow-blue-500/30 group-hover:scale-105 transition-transform">
-                T
+                A
               </div>
               <span className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">
-                Tally<span className="text-blue-500">Pro</span>
+                Anduril<span className="text-blue-500">Tech</span>
               </span>
             </Link>
           </div>
