@@ -14,6 +14,8 @@ const Products: React.FC = () => {
   const [products, setProducts] = useState<TDLProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [purchasingId, setPurchasingId] = useState<string | null>(null);
+  const [guestModal, setGuestModal] = useState<{ product: TDLProduct } | null>(null);
+  const [guestEmail, setGuestEmail] = useState('');
 
   const { user, isAuthenticated, refreshUser } = useAuth();
   const { showToast } = useToast();
@@ -37,22 +39,40 @@ const Products: React.FC = () => {
     return matchesCategory && matchesSearch;
   });
 
-  const handleBuyNow = async (product: TDLProduct) => {
+  const handleBuyNow = async (product: TDLProduct, overrideEmail?: string) => {
+    // If not logged in, show email modal to collect Gmail
     if (!isAuthenticated || !user) {
-      if (confirm("You need to login to purchase. Go to login?")) {
-        navigate('/login');
+      if (!overrideEmail) {
+        setGuestModal({ product });
+        return;
       }
+      // Guest checkout with provided email
+      setPurchasingId(product.id);
+      setGuestModal(null);
+      await openCheckout(
+        product,
+        { id: overrideEmail, name: overrideEmail.split('@')[0], email: overrideEmail } as any,
+        async (paymentId) => {
+          await db.createGuestOrder(overrideEmail, product);
+          showToast(`Purchase successful! Receipt sent to ${overrideEmail}`, 'success');
+          setGuestEmail('');
+          setPurchasingId(null);
+        },
+        (error) => {
+          showToast(error.description || 'Payment failed', 'error');
+          setPurchasingId(null);
+        }
+      );
       return;
     }
 
     if (user.purchasedProducts?.includes(product.id)) {
-      showToast("You already own this product!", "info");
+      showToast('You already own this product!', 'info');
       navigate('/dashboard');
       return;
     }
 
     setPurchasingId(product.id);
-
     await openCheckout(
       product,
       user,
@@ -60,16 +80,16 @@ const Products: React.FC = () => {
         const updatedUser = await db.createOrder(user.id, product);
         if (updatedUser) {
           await refreshUser();
-          showToast(`Purchase Successful! Ref: ${paymentId}`, "success");
+          showToast(`Purchase Successful! Ref: ${paymentId}`, 'success');
           navigate('/dashboard');
         } else {
-          showToast("Payment success but order creation failed. Contact support.", "error");
+          showToast('Payment success but order creation failed. Contact support.', 'error');
         }
         setPurchasingId(null);
       },
       (error) => {
-        console.error("Payment failed", error);
-        showToast(error.description || "Payment failed", "error");
+        console.error('Payment failed', error);
+        showToast(error.description || 'Payment failed', 'error');
         setPurchasingId(null);
       }
     );
@@ -243,6 +263,59 @@ const Products: React.FC = () => {
         </Link>
       </div>
     </div>
+
+      {/* Guest Email Modal */ }
+  {
+    guestModal && (
+      <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
+        <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl p-8 shadow-2xl border border-slate-200 dark:border-white/10 animate-fade-in-up">
+          <div className="text-center mb-6">
+            <div className="w-14 h-14 bg-blue-600/10 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-7 h-7 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-1">Enter your Gmail</h2>
+            <p className="text-slate-500 dark:text-slate-400 text-sm">
+              Your purchase of <span className="font-semibold text-blue-600">{guestModal.product.name}</span> will be saved to this email
+            </p>
+          </div>
+
+          <input
+            type="email"
+            value={guestEmail}
+            onChange={(e) => setGuestEmail(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && guestEmail.includes('@') && handleBuyNow(guestModal.product, guestEmail)}
+            placeholder="yourname@gmail.com"
+            className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-blue-500 transition-colors mb-4"
+            autoFocus
+          />
+
+          <div className="flex gap-3">
+            <button
+              onClick={() => { setGuestModal(null); setGuestEmail(''); }}
+              className="flex-1 py-3 rounded-xl border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 font-semibold hover:bg-slate-50 dark:hover:bg-white/5 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={() => guestEmail.includes('@') && handleBuyNow(guestModal.product, guestEmail)}
+              disabled={!guestEmail.includes('@')}
+              className="flex-1 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold transition-colors disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-blue-500/25"
+            >
+              Proceed to Pay ₹{guestModal.product.price.toLocaleString('en-IN')}
+            </button>
+          </div>
+
+          <p className="text-center text-xs text-slate-400 mt-4">
+            Already have an account?{' '}
+            <button onClick={() => { setGuestModal(null); navigate('/login'); }} className="text-blue-500 hover:underline">Login here</button>
+          </p>
+        </div>
+      </div>
+    )
+  }
+    </div >
   );
 };
 
