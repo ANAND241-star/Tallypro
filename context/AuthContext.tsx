@@ -20,15 +20,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     const initAuth = async () => {
-      const savedUser = localStorage.getItem('tallypro_session');
+      const savedUser = localStorage.getItem('anduriltech_session');
       if (savedUser) {
         try {
           const parsedUser = JSON.parse(savedUser);
-          // Sync with DB asynchronously
+          // Admin accounts live only in env/memory — restore from localStorage directly
+          if (parsedUser.id === 'admin_1' || parsedUser.id === 'admin_2') {
+            setUser(parsedUser);
+            return;
+          }
+          // For regular users — sync with DB
           const dbUser = await db.getUserByEmail(parsedUser.email);
           if (dbUser) setUser(dbUser);
         } catch (e) {
-          console.error("Failed to restore session", e);
+          console.error('Failed to restore session', e);
+          localStorage.removeItem('anduriltech_session');
         }
       }
     };
@@ -39,37 +45,36 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (user) {
       const updatedUser = await db.getUserByEmail(user.email);
       if (updatedUser) {
-        setUser(updatedUser);
-        localStorage.setItem('tallypro_session', JSON.stringify(updatedUser));
+        const { password: _, ...safeUser } = updatedUser as any;
+        setUser(safeUser);
+        localStorage.setItem('anduriltech_session', JSON.stringify(safeUser));
       }
     }
   };
 
   const login = async (email: string, password = '', requiredRole: 'admin' | 'customer' = 'customer') => {
-    // 1. Verify Credentials via DB (Async)
     const dbUser = await db.login(email, password);
 
-    // 2. Admin Login Flow
     if (requiredRole === 'admin') {
       if (dbUser && (dbUser.role === 'admin' || dbUser.role === 'super_admin')) {
-        setUser(dbUser);
-        localStorage.setItem('tallypro_session', JSON.stringify(dbUser));
+        const { password: _, ...safeUser } = dbUser as any;
+        setUser(safeUser);
+        localStorage.setItem('anduriltech_session', JSON.stringify(safeUser));
         return true;
       }
       return false;
     }
 
-    // 3. Customer Login Flow
     if (requiredRole === 'customer') {
       if (dbUser && (dbUser.role === 'admin' || dbUser.role === 'super_admin')) {
-        console.warn("Admins must use admin portal");
+        console.warn('Admins must use admin portal');
         return false;
       }
-
       if (dbUser) {
         if (dbUser.status === 'inactive') return false;
-        setUser(dbUser);
-        localStorage.setItem('tallypro_session', JSON.stringify(dbUser));
+        const { password: _, ...safeUser } = dbUser as any;
+        setUser(safeUser);
+        localStorage.setItem('anduriltech_session', JSON.stringify(safeUser));
         return true;
       }
       return false;
@@ -81,21 +86,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signup = async (name: string, email: string, password: string) => {
     try {
       const newUser: User = {
-        // id will be set by firebase uid
         id: '',
-        name: name,
-        email: email,
-        password: password, // Note: storing password in DB is bad practice, but keeping for compatibility with existing types. Firebase Auth handles real auth.
+        name,
+        email,
+        // SECURITY: password NOT stored — Firebase Auth handles auth
         role: 'customer',
         status: 'active',
         joinedAt: new Date().toISOString(),
         purchasedProducts: []
       };
-
-      // Use signup method which handles auth creation + firestore doc
       const createdUser = await db.signup(newUser, password);
-      setUser(createdUser);
-      localStorage.setItem('tallypro_session', JSON.stringify(createdUser));
+      const { password: _, ...safeCreatedUser } = createdUser as any;
+      setUser(safeCreatedUser);
+      localStorage.setItem('anduriltech_session', JSON.stringify(safeCreatedUser));
       return true;
     } catch (error: any) {
       if (error.code === 'auth/email-already-in-use') {
@@ -108,7 +111,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem('tallypro_session');
+    localStorage.removeItem('anduriltech_session');
   };
 
   return (

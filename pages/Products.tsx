@@ -39,11 +39,18 @@ const Products: React.FC = () => {
     return matchesCategory && matchesSearch;
   });
 
+  const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+
   const handleBuyNow = async (product: TDLProduct, overrideEmail?: string) => {
     // If not logged in, show email modal to collect Gmail
     if (!isAuthenticated || !user) {
       if (!overrideEmail) {
         setGuestModal({ product });
+        return;
+      }
+      // Validate email before proceeding
+      if (!isValidEmail(overrideEmail)) {
+        showToast('Please enter a valid email address', 'error');
         return;
       }
       // Guest checkout with provided email
@@ -285,7 +292,7 @@ const Products: React.FC = () => {
             type="email"
             value={guestEmail}
             onChange={(e) => setGuestEmail(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && guestEmail.includes('@') && handleBuyNow(guestModal.product, guestEmail)}
+            onKeyDown={(e) => e.key === 'Enter' && isValidEmail(guestEmail) && handleBuyNow(guestModal.product, guestEmail)}
             placeholder="yourname@gmail.com"
             className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-blue-500 transition-colors mb-4"
             autoFocus
@@ -299,8 +306,8 @@ const Products: React.FC = () => {
               Cancel
             </button>
             <button
-              onClick={() => guestEmail.includes('@') && handleBuyNow(guestModal.product, guestEmail)}
-              disabled={!guestEmail.includes('@')}
+              onClick={() => isValidEmail(guestEmail) && handleBuyNow(guestModal.product, guestEmail)}
+              disabled={!isValidEmail(guestEmail)}
               className="flex-1 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold transition-colors disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-blue-500/25"
             >
               Proceed to Pay ₹{guestModal.product.price.toLocaleString('en-IN')}
