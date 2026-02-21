@@ -30,6 +30,17 @@ class CloudDatabaseService {
     this.products = this.load('products', TDL_PRODUCTS.map(p => ({ ...p, active: true })));
     this.orders = this.load('orders', INITIAL_ORDERS);
     this.tickets = this.load('tickets', INITIAL_TICKETS);
+
+    // Always ensure admin user exists with correct credentials (overrides stale localStorage)
+    const ADMIN_EMAIL = 'anandjatt689@gmail.com';
+    const ADMIN_PASSWORD = 'Admin@123';
+    const adminIndex = this.users.findIndex(u => u.email === ADMIN_EMAIL);
+    if (adminIndex >= 0) {
+      this.users[adminIndex] = { ...this.users[adminIndex], password: ADMIN_PASSWORD, role: 'super_admin', status: 'active' };
+    } else {
+      this.users.push({ id: 'admin_1', name: 'Super Admin', email: ADMIN_EMAIL, password: ADMIN_PASSWORD, role: 'super_admin', status: 'active', purchasedProducts: [], joinedAt: '2023-01-01' });
+    }
+    this.save('users', this.users);
   }
 
   private load<T>(key: string, defaultData: T): T {
@@ -49,7 +60,7 @@ class CloudDatabaseService {
   async getProducts(): Promise<TDLProduct[]> {
     return this.wait(this.products);
   }
-  
+
   async addProduct(product: TDLProduct): Promise<TDLProduct> {
     this.products = [product, ...this.products];
     this.save('products', this.products);
@@ -79,10 +90,10 @@ class CloudDatabaseService {
   async verifyCredentials(email: string, password?: string): Promise<User | null> {
     const user = this.users.find(u => u.email.toLowerCase() === email.toLowerCase());
     await this.wait(null); // Simulate delay
-    
+
     if (!user) return null;
     if (user.password && user.password !== password) return null;
-    
+
     return user;
   }
 
@@ -94,7 +105,7 @@ class CloudDatabaseService {
     this.save('users', this.users);
     return this.wait(true);
   }
-  
+
   async updateUserProfile(userId: string, updates: { name: string }): Promise<User | null> {
     const userIndex = this.users.findIndex(u => u.id === userId);
     if (userIndex === -1) return this.wait(null);
@@ -136,13 +147,13 @@ class CloudDatabaseService {
 
     const currentUser = this.users[userIndex];
     if (!currentUser.purchasedProducts?.includes(product.id)) {
-        const updatedUser = {
-            ...currentUser,
-            purchasedProducts: [...(currentUser.purchasedProducts || []), product.id]
-        };
-        this.users[userIndex] = updatedUser;
-        this.save('users', this.users);
-        return this.wait(updatedUser);
+      const updatedUser = {
+        ...currentUser,
+        purchasedProducts: [...(currentUser.purchasedProducts || []), product.id]
+      };
+      this.users[userIndex] = updatedUser;
+      this.save('users', this.users);
+      return this.wait(updatedUser);
     }
     return this.wait(currentUser);
   }
@@ -151,7 +162,7 @@ class CloudDatabaseService {
     const revenue = this.orders.reduce((sum, ord) => ord.status === 'success' ? sum + ord.amount : sum, 0);
     return this.wait(revenue);
   }
-  
+
   async getOrders(): Promise<Order[]> {
     return this.wait(this.orders);
   }
