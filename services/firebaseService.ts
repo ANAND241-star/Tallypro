@@ -164,6 +164,55 @@ export class FirebaseDatabaseService {
         return false;
     }
 
+    // Guest purchase — no login needed, just email
+    async createGuestOrder(email: string, product: TDLProduct): Promise<User | null> {
+        // 1. Find or create user by email
+        let user = await this.getUserByEmail(email);
+        let userId: string;
+
+        if (!user) {
+            // Create a new guest user record in Firestore (no Firebase Auth account)
+            const guestUser: User = {
+                id: '',
+                name: email.split('@')[0], // Use email prefix as name
+                email: email,
+                role: 'customer',
+                status: 'active',
+                joinedAt: new Date().toISOString(),
+                purchasedProducts: []
+            };
+            const docRef = await addDoc(collection(db, 'users'), guestUser);
+            userId = docRef.id;
+            user = { ...guestUser, id: userId };
+            // Update the doc with its own ID
+            await updateDoc(doc(db, 'users', userId), { id: userId });
+        } else {
+            userId = user.id;
+        }
+
+        // 2. Create order record
+        const newOrder: Order = {
+            id: 'ord_' + Math.random().toString(36).substr(2, 9),
+            userId,
+            userName: user.name,
+            productId: product.id,
+            productName: product.name,
+            amount: product.price,
+            status: 'success',
+            date: new Date().toISOString()
+        };
+        await addDoc(collection(db, 'orders'), newOrder);
+
+        // 3. Update purchasedProducts
+        const alreadyOwned = user.purchasedProducts?.includes(product.id);
+        if (!alreadyOwned) {
+            const updatedProducts = [...(user.purchasedProducts || []), product.id];
+            await updateDoc(doc(db, 'users', userId), { purchasedProducts: updatedProducts });
+            return { ...user, purchasedProducts: updatedProducts };
+        }
+        return user;
+    }
+
     async updateUserProfile(userId: string, updates: { name: string }): Promise<User | null> {
         const userRef = doc(db, "users", userId);
         await updateDoc(userRef, updates);
