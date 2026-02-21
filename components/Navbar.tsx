@@ -3,12 +3,14 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import ThemeToggle from './ThemeToggle';
 import { useAuth } from '../context/AuthContext';
+import { useCart } from '../context/CartContext';
 
 const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
   const { isAuthenticated, user, logout } = useAuth();
+  const { cartCount } = useCart();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -31,6 +33,24 @@ const Navbar: React.FC = () => {
   };
 
   const isActive = (path: string) => location.pathname === path;
+
+  const CartIcon = () => (
+    <Link
+      to="/cart"
+      className="relative p-2 rounded-lg text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-100 dark:hover:bg-white/10 transition-all"
+      title="Cart"
+    >
+      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+          d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+      </svg>
+      {cartCount > 0 && (
+        <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow-lg">
+          {cartCount > 9 ? '9+' : cartCount}
+        </span>
+      )}
+    </Link>
+  );
 
   return (
     <nav className={`fixed w-full z-50 transition-all duration-300 ${scrolled ? 'glass border-b border-slate-200 dark:border-white/5 py-2' : 'bg-transparent py-4'}`}>
@@ -62,7 +82,8 @@ const Navbar: React.FC = () => {
             </div>
           </div>
 
-          <div className="hidden md:flex items-center space-x-4">
+          <div className="hidden md:flex items-center space-x-3">
+            <CartIcon />
             <ThemeToggle />
 
             {isAuthenticated ? (
@@ -98,7 +119,8 @@ const Navbar: React.FC = () => {
             )}
           </div>
 
-          <div className="md:hidden flex items-center space-x-4">
+          <div className="md:hidden flex items-center space-x-3">
+            <CartIcon />
             <ThemeToggle />
             <button
               onClick={() => setIsOpen(!isOpen)}
@@ -127,6 +149,18 @@ const Navbar: React.FC = () => {
                 {link.name}
               </Link>
             ))}
+            <Link
+              to="/cart"
+              onClick={() => setIsOpen(false)}
+              className="flex items-center gap-2 px-3 py-4 text-slate-600 dark:text-slate-300 font-medium border-b border-slate-200 dark:border-white/5"
+            >
+              🛒 Cart
+              {cartCount > 0 && (
+                <span className="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+                  {cartCount}
+                </span>
+              )}
+            </Link>
 
             {isAuthenticated ? (
               <>

@@ -16,6 +16,8 @@ import NotFound from './pages/NotFound';
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider } from './context/AuthContext';
 import { ToastProvider } from './context/ToastContext';
+import { CartProvider } from './context/CartContext';
+import Cart from './pages/Cart';
 import ProtectedRoute from './components/ProtectedRoute';
 
 // Scroll to top on route change
@@ -46,36 +48,39 @@ const App: React.FC = () => {
     <ThemeProvider>
       <ToastProvider>
         <AuthProvider>
-          <Router>
-            <div className="flex flex-col min-h-screen">
-              <ScrollToTop />
-              <Navbar />
-              <main className="flex-grow">
-                <Routes>
-                  <Route path="/" element={<Home />} />
-                  <Route path="/products" element={<Products />} />
-                  <Route path="/contact" element={<Contact />} />
-                  <Route path="/login" element={<Login />} />
-                  <Route path="/signup" element={<Signup />} />
-                  <Route path="/admin-login" element={<AdminLogin />} />
-                  <Route path="/forgot-password" element={<ForgotPassword />} />
-                  <Route path="/dashboard" element={
-                    <ProtectedRoute>
-                      <UserDashboard />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/admin" element={
-                    <ProtectedRoute requiredRole="admin">
-                      <AdminDashboard />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </main>
-              <Footer />
-              <WhatsAppButton />
-            </div>
-          </Router>
+          <CartProvider>
+            <Router>
+              <div className="flex flex-col min-h-screen">
+                <ScrollToTop />
+                <Navbar />
+                <main className="flex-grow">
+                  <Routes>
+                    <Route path="/" element={<Home />} />
+                    <Route path="/products" element={<Products />} />
+                    <Route path="/cart" element={<Cart />} />
+                    <Route path="/contact" element={<Contact />} />
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/signup" element={<Signup />} />
+                    <Route path="/admin-login" element={<AdminLogin />} />
+                    <Route path="/forgot-password" element={<ForgotPassword />} />
+                    <Route path="/dashboard" element={
+                      <ProtectedRoute>
+                        <UserDashboard />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/admin" element={
+                      <ProtectedRoute requiredRole="admin">
+                        <AdminDashboard />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </main>
+                <Footer />
+                <WhatsAppButton />
+              </div>
+            </Router>
+          </CartProvider>
         </AuthProvider>
       </ToastProvider>
     </ThemeProvider>
