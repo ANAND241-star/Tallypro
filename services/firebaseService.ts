@@ -97,11 +97,20 @@ export class FirebaseDatabaseService {
 
     // Replaces "verifyCredentials" - actually logs in
     async login(email: string, password: string): Promise<User | null> {
-        // --- ADMIN BYPASS: Hardcoded admin credentials (works without Firebase Auth) ---
+        // --- ADMIN BYPASS: Read credentials from environment variables (not hardcoded) ---
         const ADMIN_ACCOUNTS = [
-            { email: 'anandjatt689@gmail.com', password: 'Admin@123', name: 'Super Admin', id: 'admin_1', role: 'super_admin' as const },
-            { email: 'pjat95105@gmail.com', password: 'pawan900@#', name: 'Admin', id: 'admin_2', role: 'admin' as const },
-        ];
+            {
+                email: import.meta.env.VITE_ADMIN1_EMAIL,
+                password: import.meta.env.VITE_ADMIN1_PASS,
+                name: 'Super Admin', id: 'admin_1', role: 'super_admin' as const
+            },
+            {
+                email: import.meta.env.VITE_ADMIN2_EMAIL,
+                password: import.meta.env.VITE_ADMIN2_PASS,
+                name: 'Admin', id: 'admin_2', role: 'admin' as const
+            },
+        ].filter(a => a.email && a.password); // Only include if env vars are set
+
         const adminMatch = ADMIN_ACCOUNTS.find(
             a => a.email.toLowerCase() === email.toLowerCase() && a.password === password
         );
@@ -172,9 +181,8 @@ export class FirebaseDatabaseService {
 
         if (!user) {
             // Create a new guest user record in Firestore (no Firebase Auth account)
-            const guestUser: User = {
-                id: '',
-                name: email.split('@')[0], // Use email prefix as name
+            const guestUser: Omit<User, 'id'> = {
+                name: email.split('@')[0],
                 email: email,
                 role: 'customer',
                 status: 'active',
@@ -183,16 +191,20 @@ export class FirebaseDatabaseService {
             };
             const docRef = await addDoc(collection(db, 'users'), guestUser);
             userId = docRef.id;
-            user = { ...guestUser, id: userId };
-            // Update the doc with its own ID
+            // Update the doc with its own Firestore ID
             await updateDoc(doc(db, 'users', userId), { id: userId });
+            user = { ...guestUser, id: userId } as User;
         } else {
             userId = user.id;
         }
 
-        // 2. Create order record
+        // 2. Create order record with crypto-safe ID
+        const orderId = typeof crypto !== 'undefined' && crypto.randomUUID
+            ? 'ord_' + crypto.randomUUID().replace(/-/g, '').slice(0, 12)
+            : 'ord_' + Date.now().toString(36);
+
         const newOrder: Order = {
-            id: 'ord_' + Math.random().toString(36).substr(2, 9),
+            id: orderId,
             userId,
             userName: user.name,
             productId: product.id,
@@ -203,7 +215,7 @@ export class FirebaseDatabaseService {
         };
         await addDoc(collection(db, 'orders'), newOrder);
 
-        // 3. Update purchasedProducts
+        // 3. Update purchasedProducts (only if not already owned)
         const alreadyOwned = user.purchasedProducts?.includes(product.id);
         if (!alreadyOwned) {
             const updatedProducts = [...(user.purchasedProducts || []), product.id];

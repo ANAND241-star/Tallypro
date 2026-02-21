@@ -38,7 +38,6 @@ export const openCheckout = async (
     }
 
     const key = import.meta.env.VITE_RAZORPAY_KEY_ID?.trim();
-    console.log("Initializing Razorpay with Key:", key ? "Key Found" : "Key Missing");
 
     if (!key) {
         alert("Razorpay Key ID is missing! Check .env file.");
@@ -51,9 +50,8 @@ export const openCheckout = async (
         currency: "INR",
         name: "AndurilTech",
         description: `Purchase ${product.name}`,
-        image: "https://example.com/your_logo",
+        image: import.meta.env.VITE_LOGO_URL || "https://anduriltech.in/logo.png",
         handler: function (response: any) {
-            console.log("Payment Success:", response);
             onSuccess(response.razorpay_payment_id);
         },
         prefill: {
@@ -69,7 +67,7 @@ export const openCheckout = async (
         },
         modal: {
             ondismiss: function () {
-                console.log("Checkout modal closed");
+                // User closed checkout
             }
         }
     };
@@ -80,7 +78,6 @@ export const openCheckout = async (
             console.error("Payment Failed Event:", response.error);
             onFailure(response.error);
         });
-        console.log("Opening Razorpay Checkout...");
         paymentObject.open();
     } catch (err) {
         console.error("Error creating Razorpay instance:", err);
