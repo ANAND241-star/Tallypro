@@ -46,7 +46,7 @@ const Signup: React.FC = () => {
             <div className="w-full max-w-md glass-card p-8 rounded-3xl border border-slate-200 dark:border-white/10 shadow-2xl animate-fade-in-up">
                 <div className="text-center mb-10">
                     <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">Create Account</h1>
-                    <p className="text-slate-500 dark:text-slate-400">Join TallyPro Solutions</p>
+                    <p className="text-slate-500 dark:text-slate-400">Join AndurilTech</p>
                 </div>
 
                 {error && (

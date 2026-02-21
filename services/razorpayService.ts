@@ -49,7 +49,7 @@ export const openCheckout = async (
         key: key,
         amount: product.price * 100,
         currency: "INR",
-        name: "TallyPro Solutions",
+        name: "AndurilTech",
         description: `Purchase ${product.name}`,
         image: "https://example.com/your_logo",
         handler: function (response: any) {
@@ -62,7 +62,7 @@ export const openCheckout = async (
             contact: ""
         },
         notes: {
-            address: "TallyPro Corporate Office"
+            address: "AndurilTech Corporate Office"
         },
         theme: {
             color: "#3399cc"
