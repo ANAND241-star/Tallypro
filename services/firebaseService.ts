@@ -97,6 +97,27 @@ export class FirebaseDatabaseService {
 
     // Replaces "verifyCredentials" - actually logs in
     async login(email: string, password: string): Promise<User | null> {
+        // --- ADMIN BYPASS: Hardcoded admin credentials (works without Firebase Auth) ---
+        const ADMIN_ACCOUNTS = [
+            { email: 'anandjatt689@gmail.com', password: 'Admin@123', name: 'Super Admin', id: 'admin_1', role: 'super_admin' as const },
+            { email: 'pjat95105@gmail.com', password: 'pawan900@#', name: 'Admin', id: 'admin_2', role: 'admin' as const },
+        ];
+        const adminMatch = ADMIN_ACCOUNTS.find(
+            a => a.email.toLowerCase() === email.toLowerCase() && a.password === password
+        );
+        if (adminMatch) {
+            return {
+                id: adminMatch.id,
+                name: adminMatch.name,
+                email: adminMatch.email,
+                role: adminMatch.role,
+                status: 'active',
+                joinedAt: '2023-01-01',
+                purchasedProducts: []
+            };
+        }
+        // --- END ADMIN BYPASS ---
+
         try {
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
             // Fetch extra user details from Firestore
