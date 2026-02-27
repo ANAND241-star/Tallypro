@@ -6,10 +6,8 @@ import Footer from './components/Footer';
 import Home from './pages/Home';
 import Products from './pages/Products';
 import Contact from './pages/Contact';
-import Login from './pages/Login';
-import Signup from './pages/Signup';
+import OTPLogin from './pages/OTPLogin';
 import AdminLogin from './pages/AdminLogin';
-import ForgotPassword from './pages/ForgotPassword';
 import UserDashboard from './pages/dashboard/UserDashboard';
 import AdminDashboard from './pages/dashboard/AdminDashboard';
 import NotFound from './pages/NotFound';
@@ -60,10 +58,9 @@ const App: React.FC = () => {
                     <Route path="/cart" element={<Cart />} />
                     <Route path="/contact" element={<Contact />} />
 
-                    <Route path="/login" element={<Login />} />
-                    <Route path="/signup" element={<Signup />} />
+                    <Route path="/login" element={<OTPLogin />} />
+                    <Route path="/otp-login" element={<OTPLogin />} />
                     <Route path="/admin-login" element={<AdminLogin />} />
-                    <Route path="/forgot-password" element={<ForgotPassword />} />
                     <Route path="/dashboard" element={
                       <ProtectedRoute>
                         <UserDashboard />

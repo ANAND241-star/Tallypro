@@ -9,9 +9,13 @@ import { TDLProduct, Ticket } from '../../types';
 type DashboardTab = 'downloads' | 'support' | 'settings';
 
 const UserDashboard: React.FC = () => {
-  const { user, refreshUser } = useAuth();
+  const { user, refreshUser, needsFeedback, setNeedsFeedback } = useAuth();
   const { showToast } = useToast();
   const [activeTab, setActiveTab] = useState<DashboardTab>('downloads');
+
+  // Feedback Form
+  const [feedbackForm, setFeedbackForm] = useState({ rating: 5, comment: '' });
+  const [submittingFeedback, setSubmittingFeedback] = useState(false);
 
   // Support Form
   const [showTicketForm, setShowTicketForm] = useState(false);
@@ -123,6 +127,15 @@ const UserDashboard: React.FC = () => {
     } finally {
       setUpdating(false);
     }
+  };
+
+  const submitFeedback = async () => {
+    if (!user) return;
+    setSubmittingFeedback(true);
+    await db.createFeedback(user.name, user.email, feedbackForm.rating, feedbackForm.comment);
+    setSubmittingFeedback(false);
+    setNeedsFeedback(false);
+    showToast('Thank you for your feedback!', 'success');
   };
 
   if (loading) {
@@ -369,6 +382,59 @@ const UserDashboard: React.FC = () => {
         )}
 
       </div>
+
+      {/* Mandatory Feedback Modal */}
+      {needsFeedback && (
+        <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
+          <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl p-8 shadow-2xl border border-slate-200 dark:border-white/10 animate-fade-in-up">
+            <div className="text-center mb-6">
+              <div className="w-14 h-14 bg-green-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-3xl">🎉</span>
+              </div>
+              <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-1">Welcome!</h2>
+              <p className="text-slate-500 dark:text-slate-400 text-sm">
+                Before continuing, please share your feedback.
+              </p>
+            </div>
+
+            <div className="space-y-6">
+              <div>
+                <label className="block text-center text-sm font-bold text-slate-700 dark:text-slate-300 mb-3">Rate your experience</label>
+                <div className="flex justify-center gap-2">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      onClick={() => setFeedbackForm({ ...feedbackForm, rating: star })}
+                      className={`text-3xl transition-transform hover:scale-110 ${feedbackForm.rating >= star ? 'text-yellow-400' : 'text-slate-200 dark:text-slate-700'}`}
+                    >
+                      ★
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Any comments? (Optional)</label>
+                <textarea
+                  value={feedbackForm.comment}
+                  onChange={(e) => setFeedbackForm({ ...feedbackForm, comment: e.target.value })}
+                  placeholder="Tell us what you liked or how we can improve..."
+                  rows={3}
+                  className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-blue-500 transition-colors resize-none"
+                />
+              </div>
+
+              <button
+                onClick={submitFeedback}
+                disabled={submittingFeedback}
+                className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold transition-colors disabled:opacity-40 disabled:cursor-wait shadow-lg shadow-blue-500/25"
+              >
+                {submittingFeedback ? 'Submitting...' : 'Submit Feedback & Continue'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

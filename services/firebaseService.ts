@@ -1,4 +1,4 @@
-
+import emailjs from '@emailjs/browser';
 import {
     collection,
     getDocs,
@@ -24,7 +24,7 @@ import {
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { auth, db, storage } from './firebaseConfig';
 import { db as mockDb } from './mockDatabase';
-import { User, TDLProduct, Order, Ticket, Feedback } from '../types';
+import { User, TDLProduct, Order, Ticket, Feedback, OTP } from '../types';
 
 export class FirebaseDatabaseService {
 
@@ -408,6 +408,124 @@ export class FirebaseDatabaseService {
                 }
             );
         });
+    }
+
+    // --- OTP Authentication ---
+    async generateOTP(email: string): Promise<string> {
+        // Generate 6-digit OTP
+        const code = Math.floor(100000 + Math.random() * 900000).toString();
+        const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString(); // 10 minutes
+
+        // Delete any existing unused OTPs for this email
+        const existingOTPQuery = query(
+            collection(db, "otps"),
+            where("email", "==", email),
+            where("used", "==", false)
+        );
+        const existingOTPs = await getDocs(existingOTPQuery);
+        const deletePromises = existingOTPs.docs.map(doc => deleteDoc(doc.ref));
+        await Promise.all(deletePromises);
+
+        // Create new OTP
+        const newOTP = {
+            email,
+            code,
+            expiresAt,
+            used: false
+        };
+
+        await addDoc(collection(db, "otps"), newOTP);
+
+        // Send OTP via email (you'll need to implement email service)
+        await this.sendOTPEmail(email, code);
+
+        return code;
+    }
+
+    async validateOTP(email: string, code: string): Promise<boolean> {
+        const otpQuery = query(
+            collection(db, "otps"),
+            where("email", "==", email),
+            where("code", "==", code),
+            where("used", "==", false)
+        );
+
+        const otpSnapshot = await getDocs(otpQuery);
+
+        if (otpSnapshot.empty) {
+            return false;
+        }
+
+        const otpDoc = otpSnapshot.docs[0];
+        const otpData = otpDoc.data() as OTP;
+
+        // Check if OTP is expired
+        if (new Date() > new Date(otpData.expiresAt)) {
+            await deleteDoc(otpDoc.ref);
+            return false;
+        }
+
+        // Mark OTP as used
+        await updateDoc(otpDoc.ref, { used: true });
+        return true;
+    }
+
+    async sendOTPEmail(email: string, code: string): Promise<void> {
+        // This is a mock implementation - you'll need to integrate with your email service
+        console.log(`Sending OTP ${code} to ${email}`);
+
+        // In production, you would call your email service API here
+        try {
+            // Real email sending with EmailJS
+            console.log(`Sending real OTP Email via EmailJS...`);
+
+            await emailjs.send('service_jdtdk89', 'template_cl7r1wj', {
+                to_email: email,
+                otp: code,
+            }, 'ywmFXzRwE-qfKxyzI');
+            console.log(`OTP Email successfully sent to ${email}`);
+
+            // You can implement actual email sending here
+            // Example with EmailJS:
+            // await emailjs.send('service_id', 'template_id', {
+            //     to_email: email,
+            //     otp_code: code,
+            //     subject: 'Your AndurilTech OTP Code'
+            // });
+
+        } catch (error) {
+            console.error('Failed to send OTP email:', error);
+            throw new Error('Failed to send OTP email');
+        }
+    }
+
+    async loginWithOTP(email: string, code: string): Promise<User | null> {
+        const isValid = await this.validateOTP(email, code);
+
+        if (!isValid) {
+            return null;
+        }
+
+        // Find or create user
+        let user = await this.getUserByEmail(email);
+
+        if (!user) {
+            // Create new user with OTP login
+            const newUser: Omit<User, 'id'> = {
+                name: email.split('@')[0],
+                email,
+                role: 'customer',
+                status: 'active',
+                joinedAt: new Date().toISOString(),
+                purchasedProducts: []
+            };
+
+            const docRef = await addDoc(collection(db, 'users'), newUser);
+            await updateDoc(doc(db, 'users', docRef.id), { id: docRef.id });
+            user = { ...newUser, id: docRef.id } as User;
+        }
+
+        return user;
     }
 }
 

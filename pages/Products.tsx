@@ -14,6 +14,7 @@ const Products: React.FC = () => {
   const [products, setProducts] = useState<TDLProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [purchasingId, setPurchasingId] = useState<string | null>(null);
+  const [purchasedSessionProducts, setPurchasedSessionProducts] = useState<Record<string, { email: string, phone: string, tallySerial: string } | { isAuthenticated: true }>>({});
   const [guestModal, setGuestModal] = useState<{ product: TDLProduct } | null>(null);
   const [guestInfo, setGuestInfo] = useState({ email: '', phone: '', tallySerial: '' });
   const [successModal, setSuccessModal] = useState<{ product: TDLProduct, passwordOptions?: { email: string, password: string } } | null>(null);
@@ -76,14 +77,10 @@ const Products: React.FC = () => {
         product,
         { id: info.email, name: info.email.split('@')[0], email: info.email, phoneNumber: info.phone } as any,
         async () => {
-          const newUser = await db.createGuestOrder(info.email, product, { phoneNumber: info.phone, tallySerial: info.tallySerial });
-          showToast(`Purchase successful! Receipt sent to ${info.email}`, 'success');
+          showToast(`Payment successful! Click Download to receive your file.`, 'success');
           setGuestInfo({ email: '', phone: '', tallySerial: '' });
           setPurchasingId(null);
-          setSuccessModal({
-            product,
-            passwordOptions: newUser?.password ? { email: info.email, password: newUser.password } : undefined
-          });
+          setPurchasedSessionProducts(prev => ({ ...prev, [product.id]: info }));
         },
         (error) => {
           showToast(error.description || 'Payment failed', 'error');
@@ -94,8 +91,7 @@ const Products: React.FC = () => {
     }
 
     if (user.purchasedProducts?.includes(product.id)) {
-      showToast('You already own this product!', 'info');
-      navigate('/dashboard');
+      handleDownloadClick(product, { isAuthenticated: true });
       return;
     }
 
@@ -104,15 +100,9 @@ const Products: React.FC = () => {
       product,
       user,
       async (paymentId) => {
-        const updatedUser = await db.createOrder(user.id, product);
-        if (updatedUser) {
-          await refreshUser();
-          showToast(`Purchase Successful! Ref: ${paymentId}`, 'success');
-          setSuccessModal({ product });
-        } else {
-          showToast('Payment success but order creation failed. Contact support.', 'error');
-        }
+        showToast(`Payment Successful! Click Download to receive your file.`, 'success');
         setPurchasingId(null);
+        setPurchasedSessionProducts(prev => ({ ...prev, [product.id]: { isAuthenticated: true } }));
       },
       (error) => {
         console.error('Payment failed', error);
@@ -120,6 +110,32 @@ const Products: React.FC = () => {
         setPurchasingId(null);
       }
     );
+  };
+
+  const handleDownloadClick = async (product: TDLProduct, authInfo: { email: string, phone: string, tallySerial: string } | { isAuthenticated: true }) => {
+    // 1. Download file
+    if (product.fileData && product.fileName) {
+      const link = document.createElement('a');
+      link.href = product.fileData;
+      link.download = product.fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast(`Downloading ${product.fileName}...`, "success");
+    } else {
+      showToast(`Download started for ${product.name} (Demo Mock)`, "info");
+    }
+
+    // 2. Auto-create account or order
+    if ('isAuthenticated' in authInfo) {
+      if (user && !user.purchasedProducts?.includes(product.id)) {
+        await db.createOrder(user.id, product);
+        await refreshUser();
+      }
+    } else {
+      await db.createGuestOrder(authInfo.email, product, { phoneNumber: authInfo.phone, tallySerial: authInfo.tallySerial });
+      showToast(`Account auto-created for ${authInfo.email}. Log in with OTP to access future updates!`, 'success');
+    }
   };
 
   const handleAddToCart = (product: TDLProduct) => {
@@ -323,17 +339,23 @@ const Products: React.FC = () => {
                         </button>
                       )}
 
-                      {/* Buy Now */}
-                      <button
-                        onClick={() => handleBuyNow(p)}
-                        disabled={purchasingId === p.id}
-                        className={`flex-1 px-4 py-2.5 rounded-xl font-bold text-sm shadow-lg transition-all ${isOwned
-                          ? 'bg-green-600 hover:bg-green-500 text-white shadow-green-600/20 w-full'
-                          : 'bg-blue-600 hover:bg-blue-500 text-white shadow-blue-600/20 disabled:opacity-70 disabled:cursor-wait'
-                          }`}
-                      >
-                        {purchasingId === p.id ? 'Processing...' : (isOwned ? '📥 Download' : 'Buy Now')}
-                      </button>
+                      {/* Buy Now / Download */}
+                      {purchasedSessionProducts[p.id] || isOwned ? (
+                        <button
+                          onClick={() => handleDownloadClick(p, purchasedSessionProducts[p.id] || { isAuthenticated: true })}
+                          className="flex-1 px-4 py-2.5 rounded-xl font-bold text-sm shadow-lg transition-all bg-green-600 hover:bg-green-500 text-white shadow-green-600/20 w-full"
+                        >
+                          📥 Download TDL
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => handleBuyNow(p)}
+                          disabled={purchasingId === p.id}
+                          className={`flex-1 px-4 py-2.5 rounded-xl font-bold text-sm shadow-lg transition-all bg-blue-600 hover:bg-blue-500 text-white shadow-blue-600/20 disabled:opacity-70 disabled:cursor-wait w-full`}
+                        >
+                          {purchasingId === p.id ? 'Processing...' : 'Buy Now'}
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>

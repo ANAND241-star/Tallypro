@@ -83,6 +83,9 @@ const Login: React.FC = () => {
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-4">
             Don't have an account? <Link to="/signup" className="text-blue-500 font-bold hover:underline">Sign Up</Link>
           </p>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-2">
+            Prefer OTP? <Link to="/otp-login" className="text-blue-500 font-bold hover:underline">Login with OTP</Link>
+          </p>
         </div>
       </div>
     </div>

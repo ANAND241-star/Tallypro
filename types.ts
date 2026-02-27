@@ -116,3 +116,11 @@ export interface Feedback {
   comment: string;
   date: string;
 }
+
+export interface OTP {
+  id: string;
+  email: string;
+  code: string;
+  expiresAt: string;
+  used: boolean;
+}

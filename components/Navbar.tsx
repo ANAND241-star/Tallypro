@@ -119,12 +119,6 @@ const Navbar: React.FC = () => {
             ) : (
               <div className="flex items-center gap-3">
                 <Link
-                  to="/signup"
-                  className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium text-sm transition-all"
-                >
-                  Sign Up
-                </Link>
-                <Link
                   to="/login"
                   className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-full font-medium text-sm transition-all shadow-lg shadow-blue-500/30 flex items-center gap-2"
                 >
@@ -194,13 +188,6 @@ const Navbar: React.FC = () => {
               </>
             ) : (
               <div className="flex flex-col gap-3 mt-4">
-                <Link
-                  to="/signup"
-                  onClick={() => setIsOpen(false)}
-                  className="block w-full text-center text-slate-600 dark:text-slate-300 font-medium py-2"
-                >
-                  Sign Up
-                </Link>
                 <Link
                   to="/login"
                   onClick={() => setIsOpen(false)}

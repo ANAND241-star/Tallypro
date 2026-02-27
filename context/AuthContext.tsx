@@ -11,14 +11,26 @@ interface AuthContextType {
   refreshUser: () => Promise<void>;
   isAuthenticated: boolean;
   isAdmin: boolean;
+  needsFeedback: boolean;
+  setNeedsFeedback: (val: boolean) => void;
+  loginWithOTP: (email: string, code: string) => Promise<boolean>;
+  generateOTP: (email: string) => Promise<string>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [needsFeedback, setNeedsFeedbackState] = useState(false);
+
+  const setNeedsFeedback = (val: boolean) => {
+    setNeedsFeedbackState(val);
+    if (val) sessionStorage.setItem('needsFeedback', 'true');
+    else sessionStorage.removeItem('needsFeedback');
+  };
 
   useEffect(() => {
+    if (sessionStorage.getItem('needsFeedback')) setNeedsFeedbackState(true);
     const initAuth = async () => {
       const savedUser = localStorage.getItem('anduriltech_session');
       if (savedUser) {
@@ -114,6 +126,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.removeItem('anduriltech_session');
   };
 
+  const loginWithOTP = async (email: string, code: string): Promise<boolean> => {
+    try {
+      const dbUser = await db.loginWithOTP(email, code);
+      if (dbUser) {
+        const { password: _, ...safeUser } = dbUser as any;
+        setUser(safeUser);
+        localStorage.setItem('anduriltech_session', JSON.stringify(safeUser));
+        setNeedsFeedback(true);
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('OTP login error:', error);
+      return false;
+    }
+  };
+
+  const generateOTP = async (email: string): Promise<string> => {
+    return await db.generateOTP(email);
+  };
+
   return (
     <AuthContext.Provider value={{
       user,
@@ -122,7 +155,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       logout,
       refreshUser,
       isAuthenticated: !!user,
-      isAdmin: user?.role === 'super_admin' || user?.role === 'admin'
+      isAdmin: user?.role === 'super_admin' || user?.role === 'admin',
+      needsFeedback,
+      setNeedsFeedback,
+      loginWithOTP,
+      generateOTP
     }}>
       {children}
     </AuthContext.Provider>
