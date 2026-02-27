@@ -200,11 +200,17 @@ class CloudDatabaseService {
   // Guest purchase — no login needed
   async createGuestOrder(email: string, product: TDLProduct, details?: { phoneNumber?: string, tallySerial?: string }): Promise<User | null> {
     let user = await this.getUserByEmail(email);
+    let generatedPassword = '';
+
     if (!user) {
+      // Auto-generate a password for the new guest user
+      generatedPassword = Math.random().toString(36).slice(-8) + 'T@1';
+
       const guestUser: User = {
         id: 'guest_' + Date.now().toString(36),
         name: email.split('@')[0],
         email,
+        password: generatedPassword,
         role: 'customer',
         status: 'active',
         joinedAt: new Date().toISOString(),
@@ -234,14 +240,21 @@ class CloudDatabaseService {
     this.save('orders', this.orders);
 
     const alreadyOwned = user.purchasedProducts?.includes(product.id);
+    let returnedUser = user;
     if (!alreadyOwned) {
       const updatedProducts = [...(user.purchasedProducts || []), product.id];
       const userIndex = this.users.findIndex(u => u.id === user!.id);
       this.users[userIndex] = { ...user, purchasedProducts: updatedProducts };
       this.save('users', this.users);
-      return this.wait({ ...user, purchasedProducts: updatedProducts });
+      returnedUser = { ...user, purchasedProducts: updatedProducts };
     }
-    return this.wait(user);
+
+    // Attach the generated password to the returned user object (temporarily) so the UI can display it
+    if (generatedPassword) {
+      returnedUser = { ...returnedUser, password: generatedPassword };
+    }
+
+    return this.wait(returnedUser);
   }
 
   async getRevenue(): Promise<number> {

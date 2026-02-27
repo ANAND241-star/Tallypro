@@ -16,6 +16,7 @@ const Products: React.FC = () => {
   const [purchasingId, setPurchasingId] = useState<string | null>(null);
   const [guestModal, setGuestModal] = useState<{ product: TDLProduct } | null>(null);
   const [guestInfo, setGuestInfo] = useState({ email: '', phone: '', tallySerial: '' });
+  const [successModal, setSuccessModal] = useState<{ product: TDLProduct, passwordOptions?: { email: string, password: string } } | null>(null);
   const [youtubeModal, setYoutubeModal] = useState<{ url: string; name: string } | null>(null);
   const [feedbackModal, setFeedbackModal] = useState<{ name: string, email: string } | null>(null);
   const [feedbackForm, setFeedbackForm] = useState({ rating: 5, comment: '' });
@@ -36,21 +37,7 @@ const Products: React.FC = () => {
     fetchProducts();
   }, []);
 
-  // Clear localStorage so products reload fresh with new categories
-  useEffect(() => {
-    // Only clear if the stored products still have old categories
-    const stored = localStorage.getItem('tallypro_products');
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored);
-        const hasOldCategory = parsed.some((p: any) => p.category === 'GST' || p.category === 'Automation' || p.category === 'Inventory');
-        if (hasOldCategory) {
-          localStorage.removeItem('tallypro_products');
-          window.location.reload();
-        }
-      } catch { }
-    }
-  }, []);
+  // Removed aggressive localStorage clear to allow Admin dashboard updates to persist
 
   const filteredProducts = products.filter(p => {
     const matchesCategory = selectedCategory === 'All' || p.category === selectedCategory;
@@ -82,11 +69,14 @@ const Products: React.FC = () => {
         product,
         { id: info.email, name: info.email.split('@')[0], email: info.email, phoneNumber: info.phone } as any,
         async () => {
-          await db.createGuestOrder(info.email, product, { phoneNumber: info.phone, tallySerial: info.tallySerial });
+          const newUser = await db.createGuestOrder(info.email, product, { phoneNumber: info.phone, tallySerial: info.tallySerial });
           showToast(`Purchase successful! Receipt sent to ${info.email}`, 'success');
           setGuestInfo({ email: '', phone: '', tallySerial: '' });
           setPurchasingId(null);
-          setFeedbackModal({ name: info.email.split('@')[0], email: info.email });
+          setSuccessModal({
+            product,
+            passwordOptions: newUser?.password ? { email: info.email, password: newUser.password } : undefined
+          });
         },
         (error) => {
           showToast(error.description || 'Payment failed', 'error');
@@ -111,7 +101,7 @@ const Products: React.FC = () => {
         if (updatedUser) {
           await refreshUser();
           showToast(`Purchase Successful! Ref: ${paymentId}`, 'success');
-          setFeedbackModal({ name: user.name, email: user.email });
+          setSuccessModal({ product });
         } else {
           showToast('Payment success but order creation failed. Contact support.', 'error');
         }
@@ -480,6 +470,78 @@ const Products: React.FC = () => {
               <a href={youtubeModal.url} target="_blank" rel="noopener noreferrer" className="text-red-400 hover:text-red-300 text-sm font-medium flex items-center gap-1">
                 Open on YouTube →
               </a>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Success Modal */}
+      {successModal && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
+          <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl p-8 shadow-2xl border border-slate-200 dark:border-white/10 animate-fade-in-up">
+            <div className="text-center mb-6">
+              <div className="w-14 h-14 bg-green-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-3xl">✓</span>
+              </div>
+              <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-1">Purchase Successful!</h2>
+              <p className="text-slate-500 dark:text-slate-400 text-sm">
+                Thank you for buying <span className="font-semibold text-blue-600">{successModal.product.name}</span>
+              </p>
+            </div>
+
+            <div className="space-y-6">
+              <div className="p-4 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-center">
+                <p className="text-sm font-bold text-slate-700 dark:text-slate-300 mb-3">Your TDL is ready to download:</p>
+                <button
+                  onClick={() => {
+                    if (successModal.product.fileData && successModal.product.fileName) {
+                      const link = document.createElement('a');
+                      link.href = successModal.product.fileData;
+                      link.download = successModal.product.fileName;
+                      document.body.appendChild(link);
+                      link.click();
+                      document.body.removeChild(link);
+                      showToast(`Downloading ${successModal.product.fileName}...`, "success");
+                    } else {
+                      showToast(`Download started for ${successModal.product.name} (Demo Mock)`, "info");
+                    }
+                  }}
+                  className="w-full py-3 rounded-xl bg-green-600 hover:bg-green-700 text-white font-bold transition-colors shadow-lg shadow-green-500/25 flex items-center justify-center gap-2"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                  Download Now
+                </button>
+              </div>
+
+              {successModal.passwordOptions && (
+                <div className="p-4 rounded-xl bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20">
+                  <p className="text-xs font-bold text-blue-800 dark:text-blue-300 uppercase tracking-wider mb-2">Account Created</p>
+                  <p className="text-sm text-slate-600 dark:text-slate-300 mb-3">We've created an account so you can redownload this later.</p>
+                  <div className="bg-white dark:bg-black/20 rounded-lg p-3 font-mono text-sm border border-slate-200 dark:border-white/10">
+                    <div className="flex justify-between mb-1">
+                      <span className="text-slate-500">Email:</span>
+                      <span className="text-slate-900 dark:text-white font-bold">{successModal.passwordOptions.email}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-500">Password:</span>
+                      <span className="text-slate-900 dark:text-white font-bold">{successModal.passwordOptions.password}</span>
+                    </div>
+                  </div>
+                  <p className="text-xs text-blue-600 dark:text-blue-400 mt-2">Please save this password. You can change it in the dashboard later.</p>
+                </div>
+              )}
+
+              <button
+                onClick={() => {
+                  const email = successModal.passwordOptions?.email || user?.email || '';
+                  const name = email ? email.split('@')[0] : 'User';
+                  setSuccessModal(null);
+                  setFeedbackModal({ name, email });
+                }}
+                className="w-full py-3 rounded-xl border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 font-semibold hover:bg-slate-50 dark:hover:bg-white/5 transition-colors"
+              >
+                Continue
+              </button>
             </div>
           </div>
         </div>
