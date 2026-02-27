@@ -15,8 +15,13 @@ const firebaseConfig = {
     appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
-export const db = getFirestore(app);
-export const storage = getStorage(app);
+const hasConfig =
+  !!firebaseConfig.apiKey &&
+  !!firebaseConfig.projectId &&
+  !!firebaseConfig.appId;
+
+// Initialize Firebase only if config exists
+const app = hasConfig ? initializeApp(firebaseConfig) : undefined as any;
+export const auth = hasConfig ? getAuth(app) : (undefined as any);
+export const db = hasConfig ? getFirestore(app) : (undefined as any);
+export const storage = hasConfig ? getStorage(app) : (undefined as any);

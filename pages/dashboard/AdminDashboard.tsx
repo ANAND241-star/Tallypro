@@ -166,6 +166,7 @@ const AdminDashboard: React.FC = () => {
         } else {
           // CREATE New
           await db.addProduct({
+            id: Math.random().toString(36).substr(2, 9),
             name: newProduct.name!,
             description: newProduct.description || '',
             price: Number(newProduct.price),

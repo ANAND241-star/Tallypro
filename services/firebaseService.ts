@@ -23,6 +23,7 @@ import {
 } from 'firebase/auth';
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { auth, db, storage } from './firebaseConfig';
+import { db as mockDb } from './mockDatabase';
 import { User, TDLProduct, Order, Ticket, Feedback } from '../types';
 
 export class FirebaseDatabaseService {
@@ -410,4 +411,9 @@ export class FirebaseDatabaseService {
     }
 }
 
-export const dbService = new FirebaseDatabaseService();
+const hasFirebaseConfig =
+    !!import.meta.env.VITE_FIREBASE_API_KEY &&
+    !!import.meta.env.VITE_FIREBASE_PROJECT_ID &&
+    !!import.meta.env.VITE_FIREBASE_APP_ID;
+
+export const dbService = hasFirebaseConfig ? new FirebaseDatabaseService() : mockDb;

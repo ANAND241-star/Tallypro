@@ -67,6 +67,11 @@ class CloudDatabaseService {
   async getProducts(): Promise<TDLProduct[]> {
     return this.wait(this.products);
   }
+  
+  subscribeProducts(callback: (products: TDLProduct[]) => void): () => void {
+    callback(this.products);
+    return () => {};
+  }
 
   async addProduct(product: TDLProduct): Promise<TDLProduct> {
     this.products = [product, ...this.products];
@@ -270,6 +275,11 @@ class CloudDatabaseService {
   async getTickets(): Promise<Ticket[]> {
     return this.wait(this.tickets);
   }
+  
+  subscribeTickets(callback: (tickets: Ticket[]) => void): () => void {
+    callback(this.tickets);
+    return () => {};
+  }
 
   async createTicket(userId: string, subject: string, priority: 'low' | 'medium' | 'high'): Promise<Ticket> {
     const newTicket: Ticket = {
@@ -294,6 +304,11 @@ class CloudDatabaseService {
   // --- Feedbacks ---
   async getFeedbacks(): Promise<Feedback[]> {
     return this.wait(this.feedbacks);
+  }
+  
+  subscribeFeedbacks(callback: (feedbacks: Feedback[]) => void): () => void {
+    callback(this.feedbacks);
+    return () => {};
   }
 
   async createFeedback(userName: string, userEmail: string, rating: number, comment: string): Promise<Feedback> {
