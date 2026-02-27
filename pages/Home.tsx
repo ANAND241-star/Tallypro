@@ -1,11 +1,45 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { SERVICES, TESTIMONIALS, STATS, PROBLEM_SOLUTION, TDL_PRODUCTS } from '../constants';
 
+const FAQ_ITEMS = [
+  {
+    q: 'What is a TDL and how does it benefit my business?',
+    a: 'TDL (Tally Definition Language) is used to customize and extend Tally ERP. Our TDLs automate repetitive tasks like GST reconciliation, invoicing, and reporting — saving your team 20+ hours per month.'
+  },
+  {
+    q: 'Do I need any technical knowledge to use your TDLs?',
+    a: 'No! Our TDLs are plug-and-play. We provide full installation support and a step-by-step guide. Most clients are up and running within 30 minutes.'
+  },
+  {
+    q: 'Which version of Tally is supported?',
+    a: 'Our TDLs are compatible with Tally Prime (all versions) and Tally ERP 9. Just let us know your version during purchase and we will send the right build.'
+  },
+  {
+    q: 'What kind of support do you provide after purchase?',
+    a: 'We offer 6 months of free email and WhatsApp support for all TDL purchases. For businesses needing priority support, we offer Annual Maintenance Contracts (AMC).'
+  },
+  {
+    q: 'Can you build a custom TDL for my specific business needs?',
+    a: 'Absolutely! Custom TDL development is our core service. Share your requirements via WhatsApp or the contact form and we will provide a free quote within 24 hours.'
+  },
+  {
+    q: 'Is online payment (Razorpay) secure?',
+    a: 'Yes. All payments are processed through Razorpay, a PCI-DSS certified payment gateway. We never store your card details on our servers.'
+  }
+];
+
 
 const Home: React.FC = () => {
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [showScrollTop, setShowScrollTop] = useState(false);
 
+  useEffect(() => {
+    const handleScroll = () => setShowScrollTop(window.scrollY > 400);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   return (
     <div className="relative overflow-hidden bg-slate-50 dark:bg-dark text-slate-900 dark:text-white transition-colors duration-300">
@@ -36,7 +70,8 @@ const Home: React.FC = () => {
               Explore TDLs
             </Link>
             <a
-              href="https://wa.me/919876543210"
+              href="https://wa.me/919587742740"
+              target="_blank" rel="noopener noreferrer"
               className="px-8 py-4 bg-white/50 dark:bg-white/5 hover:bg-white/80 dark:hover:bg-white/10 text-slate-900 dark:text-white border border-slate-200 dark:border-white/10 rounded-xl font-bold text-lg backdrop-blur-sm transition-all hover:-translate-y-1 flex items-center justify-center gap-2"
             >
               <span>Talk to Expert</span>
@@ -149,23 +184,67 @@ const Home: React.FC = () => {
         </div>
       </section>
 
-      {/* 9. FINAL CTA */}
+      {/* 9. FAQ SECTION */}
+      <section className="py-24 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-16">
+          <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-4">Frequently Asked Questions</h2>
+          <p className="text-slate-500 dark:text-slate-400">Everything you need to know before getting started.</p>
+        </div>
+        <div className="space-y-4">
+          {FAQ_ITEMS.map((faq, i) => (
+            <div
+              key={i}
+              className="glass rounded-2xl border border-slate-200 dark:border-white/5 overflow-hidden transition-all"
+            >
+              <button
+                onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                className="w-full flex items-center justify-between px-6 py-5 text-left hover:bg-slate-50 dark:hover:bg-white/5 transition-colors"
+              >
+                <span className="font-semibold text-slate-900 dark:text-white pr-4">{faq.q}</span>
+                <span className={`text-blue-500 text-2xl font-light transition-transform duration-300 ${openFaq === i ? 'rotate-45' : ''}`}>+</span>
+              </button>
+              {openFaq === i && (
+                <div className="px-6 pb-5">
+                  <p className="text-slate-600 dark:text-slate-400 leading-relaxed">{faq.a}</p>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* 10. FINAL CTA */}
       <section className="py-24 px-4">
         <div className="max-w-5xl mx-auto rounded-[2.5rem] bg-gradient-to-b from-blue-800 to-slate-900 p-12 md:p-20 text-center border border-slate-200 dark:border-white/10 shadow-2xl relative overflow-hidden">
           <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
           <div className="relative z-10">
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-8">Ready to Upgrade Your TDL?</h2>
+            <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">Ready to Upgrade Your Tally?</h2>
+            <p className="text-blue-200 mb-8 text-lg">Join 250+ happy clients. Setup takes less than 30 minutes.</p>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
               <Link to="/products" className="px-10 py-4 bg-white text-blue-900 font-bold rounded-xl hover:bg-blue-50 transition-all transform hover:scale-105">
-                Get Started
+                Browse TDL Products
               </Link>
-              <a href="https://wa.me/919876543210" className="px-10 py-4 bg-transparent border border-white/30 text-white font-bold rounded-xl hover:bg-white/10 transition-all">
+              <a href="https://wa.me/919587742740" target="_blank" rel="noopener noreferrer" className="px-10 py-4 bg-transparent border border-white/30 text-white font-bold rounded-xl hover:bg-white/10 transition-all flex items-center justify-center gap-2">
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.246 2.248 3.484 5.232 3.484 8.412 0 6.556-5.338 11.892-11.893 11.892-1.997-.001-3.951-.5-5.688-1.448l-6.309 1.656zm6.224-3.82l.303.18c1.397.831 3.013 1.27 4.673 1.271 5.233 0 9.492-4.258 9.495-9.493.002-2.537-.987-4.922-2.787-6.723s-4.187-2.79-6.723-2.791c-5.233 0-9.491 4.258-9.494 9.493-.001 2.133.569 4.212 1.648 6.007l.199.333-1.082 3.95 4.04-1.06z"/></svg>
                 WhatsApp Enquiry
               </a>
             </div>
           </div>
         </div>
       </section>
+
+      {/* Scroll to Top Button */}
+      {showScrollTop && (
+        <button
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          title="Back to Top"
+          className="fixed bottom-32 right-8 z-[99] w-12 h-12 bg-blue-600 hover:bg-blue-500 text-white rounded-full flex items-center justify-center shadow-xl shadow-blue-600/30 transition-all hover:scale-110"
+        >
+          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+          </svg>
+        </button>
+      )}
 
     </div>
   );

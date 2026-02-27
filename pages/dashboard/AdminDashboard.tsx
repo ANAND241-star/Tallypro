@@ -2,8 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
-import { dbService as db } from '../../services/firebaseService';
-import { Category, TDLProduct, LicenseType, User, Order, Ticket } from '../../types';
+import { dbService as db } from '../../services/mockDatabase';
+import { Category, TDLProduct, LicenseType, User, Order, Ticket, Feedback } from '../../types';
 
 // Icons
 const Icons = {
@@ -11,10 +11,11 @@ const Icons = {
   Users: () => <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>,
   Products: () => <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>,
   Orders: () => <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>,
-  Tickets: () => <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>
+  Tickets: () => <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>,
+  Feedbacks: () => <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
 };
 
-type TabType = 'analytics' | 'users' | 'products' | 'orders' | 'tickets' | 'settings';
+type TabType = 'analytics' | 'users' | 'products' | 'orders' | 'tickets' | 'feedbacks' | 'settings';
 
 const AdminDashboard: React.FC = () => {
   const { user } = useAuth();
@@ -27,6 +28,7 @@ const AdminDashboard: React.FC = () => {
   const [products, setProducts] = useState<TDLProduct[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
   const [revenue, setRevenue] = useState<number>(0);
   const [loading, setLoading] = useState(true);
 
@@ -34,7 +36,7 @@ const AdminDashboard: React.FC = () => {
   const [showProductForm, setShowProductForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [newProduct, setNewProduct] = useState<Partial<TDLProduct>>({
-    category: Category.GST,
+    category: Category.REPORTS,
     version: '1.0',
     licenseType: 'Single User'
   });
@@ -48,18 +50,20 @@ const AdminDashboard: React.FC = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const [u, p, o, t, r] = await Promise.all([
+        const [u, p, o, t, r, f] = await Promise.all([
           db.getUsers(),
           db.getProducts(),
           db.getOrders(),
           db.getTickets(),
-          db.getRevenue()
+          db.getRevenue(),
+          db.getFeedbacks()
         ]);
         setUsers(u);
         setProducts(p.filter(prod => prod.active));
         setOrders(o);
         setTickets(t);
         setRevenue(r);
+        setFeedbacks(f);
       } catch (error) {
         console.error("Fetching dashboard data failed", error);
         showToast("Failed to load admin data", "error");
@@ -153,7 +157,7 @@ const AdminDashboard: React.FC = () => {
             name: newProduct.name!,
             description: newProduct.description || '',
             price: Number(newProduct.price),
-            category: newProduct.category || Category.GST,
+            category: newProduct.category || Category.REPORTS,
             demoUrl: '#',
             imageUrl: newProduct.imageUrl || 'https://picsum.photos/seed/' + Math.random() + '/400/300',
             youtubeUrl: newProduct.youtubeUrl || '',
@@ -188,14 +192,14 @@ const AdminDashboard: React.FC = () => {
   const handleCancelForm = () => {
     setShowProductForm(false);
     setEditingId(null);
-    setNewProduct({ category: Category.GST, version: '1.0', licenseType: 'Single User' });
+    setNewProduct({ category: Category.REPORTS, version: '1.0', licenseType: 'Single User' });
     setMainFile(null);
     setDemoFile(null);
     setUploadProgress(0);
   };
 
   const handleDeleteProduct = async (id: string) => {
-    if (confirm('Are you sure you want to delete this TDL?')) {
+    if (confirm('Are you sure you want to delete this Tally Addon?')) {
       await db.deleteProduct(id);
       const updatedProducts = await db.getProducts();
       setProducts(updatedProducts.filter(p => p.active));
@@ -239,9 +243,10 @@ const AdminDashboard: React.FC = () => {
         <div className="space-y-2">
           <SidebarItem id="analytics" label="Overview" icon={Icons.Analytics} />
           <SidebarItem id="users" label="Users" icon={Icons.Users} />
-          <SidebarItem id="products" label="TDL Products" icon={Icons.Products} />
+          <SidebarItem id="products" label="Tally Addons" icon={Icons.Products} />
           <SidebarItem id="orders" label="Orders" icon={Icons.Orders} />
           <SidebarItem id="tickets" label="Support" icon={Icons.Tickets} />
+          <SidebarItem id="feedbacks" label="Feedback" icon={Icons.Feedbacks} />
         </div>
 
         <div className="absolute bottom-24 left-4 right-4 p-4 rounded-xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10">
@@ -266,6 +271,7 @@ const AdminDashboard: React.FC = () => {
           <SidebarItem id="products" label="TDL Products" icon={Icons.Products} />
           <SidebarItem id="orders" label="Orders" icon={Icons.Orders} />
           <SidebarItem id="tickets" label="Support" icon={Icons.Tickets} />
+          <SidebarItem id="feedbacks" label="Feedback" icon={Icons.Feedbacks} />
         </div>
 
         <div className="absolute bottom-24 left-4 right-4 p-4 rounded-xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10">
@@ -367,23 +373,23 @@ const AdminDashboard: React.FC = () => {
                     }}
                     className={`px-6 py-2 rounded-lg font-bold shadow-lg transition-all ${showProductForm ? 'bg-slate-200 dark:bg-white/10 text-slate-800 dark:text-white' : 'bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/30'}`}
                   >
-                    {showProductForm ? 'Cancel' : '+ Upload New TDL'}
+                    {showProductForm ? 'Cancel' : '+ Add New Tally Addon'}
                   </button>
                 </div>
 
                 {showProductForm && (
                   <div className="glass-card p-8 rounded-2xl bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 mb-8">
                     <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-6">
-                      {editingId ? 'Edit Product' : 'Create New Product'}
+                      {editingId ? 'Edit Tally Addon' : 'Add New Tally Addon'}
                     </h3>
                     <form onSubmit={handleSaveProduct} className="space-y-6 max-w-2xl">
                       {/* Basic Info */}
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
-                          <label className="text-xs font-bold uppercase text-slate-500">TDL Name</label>
+                          <label className="text-xs font-bold uppercase text-slate-500">Addon Name</label>
                           <input
                             type="text" placeholder="e.g. GST Auto Report" required
-                            className="w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-lg px-4 py-3 text-slate-900 dark:text-white"
+                            className="w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-lg px-4 py-3 text-slate-900 dark:text-white focus:outline-none focus:border-blue-500"
                             value={newProduct.name || ''} onChange={e => setNewProduct({ ...newProduct, name: e.target.value })}
                           />
                         </div>
@@ -406,24 +412,67 @@ const AdminDashboard: React.FC = () => {
                         />
                       </div>
 
-                      {/* Image & Video Links */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <label className="text-xs font-bold uppercase text-slate-500">Image URL</label>
-                          <input
-                            type="url" placeholder="https://..."
-                            className="w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-lg px-4 py-3 text-slate-900 dark:text-white"
-                            value={newProduct.imageUrl || ''} onChange={e => setNewProduct({ ...newProduct, imageUrl: e.target.value })}
-                          />
+                      {/* Image Upload + URL */}
+                      <div className="space-y-2">
+                        <label className="text-xs font-bold uppercase text-slate-500">Product Image</label>
+
+                        {/* Image Hosting Info Banner */}
+                        <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 text-xs text-amber-700 dark:text-amber-300">
+                          <p className="font-bold mb-1">⚠️ Localhost vs Live Image Storage:</p>
+                          <p>• <strong>Testing locally?</strong> Upload a file below (saves in browser only)</p>
+                          <p>• <strong>Going LIVE?</strong> Host image online and paste the URL:</p>
+                          <div className="flex flex-wrap gap-2 mt-2">
+                            <a href="https://cloudinary.com" target="_blank" rel="noreferrer" className="px-2 py-1 bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-300 rounded-lg font-bold hover:underline">☁️ Cloudinary (Best)</a>
+                            <a href="https://imgbb.com" target="_blank" rel="noreferrer" className="px-2 py-1 bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-300 rounded-lg font-bold hover:underline">🖼️ ImgBB (Easy)</a>
+                            <a href="https://drive.google.com" target="_blank" rel="noreferrer" className="px-2 py-1 bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-300 rounded-lg font-bold hover:underline">📁 Google Drive</a>
+                          </div>
                         </div>
-                        <div className="space-y-2">
-                          <label className="text-xs font-bold uppercase text-slate-500">YouTube Video URL</label>
-                          <input
-                            type="url" placeholder="https://youtube.com/watch?v=..."
-                            className="w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-lg px-4 py-3 text-slate-900 dark:text-white"
-                            value={newProduct.youtubeUrl || ''} onChange={e => setNewProduct({ ...newProduct, youtubeUrl: e.target.value })}
-                          />
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          <div>
+                            <p className="text-[11px] text-slate-400 mb-1">Option 1: Upload Image File <span className="text-amber-500 font-semibold">(localhost only)</span></p>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (!file) return;
+                                const reader = new FileReader();
+                                reader.onloadend = () => {
+                                  setNewProduct(prev => ({ ...prev, imageUrl: reader.result as string }));
+                                };
+                                reader.readAsDataURL(file);
+                              }}
+                              className="block w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-blue-900/30 dark:file:text-blue-300 cursor-pointer"
+                            />
+                            {newProduct.imageUrl && newProduct.imageUrl.startsWith('data:') && (
+                              <img src={newProduct.imageUrl} alt="preview" className="mt-2 h-16 w-full object-cover rounded-lg border border-slate-200 dark:border-white/10" />
+                            )}
+                          </div>
+                          <div>
+                            <p className="text-[11px] text-slate-400 mb-1">Option 2: Paste Image URL <span className="text-green-500 font-semibold">✓ Works on live site</span></p>
+                            <input
+                              type="url" placeholder="https://res.cloudinary.com/... or https://i.ibb.co/..."
+                              className="w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-lg px-3 py-2 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-blue-500"
+                              value={(!newProduct.imageUrl || newProduct.imageUrl.startsWith('data:')) ? '' : newProduct.imageUrl}
+                              onChange={e => setNewProduct({ ...newProduct, imageUrl: e.target.value })}
+                            />
+                            {newProduct.imageUrl && !newProduct.imageUrl.startsWith('data:') && newProduct.imageUrl.startsWith('http') && (
+                              <img src={newProduct.imageUrl} alt="preview" className="mt-2 h-16 w-full object-cover rounded-lg border border-green-200 dark:border-green-500/30" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                            )}
+                          </div>
                         </div>
+                      </div>
+
+                      {/* YouTube URL */}
+                      <div className="space-y-2">
+                        <label className="text-xs font-bold uppercase text-slate-500">YouTube Demo Video URL</label>
+                        <input
+                          type="url" placeholder="https://youtube.com/watch?v=... (Customers can watch how to use this addon)"
+                          className="w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-lg px-4 py-3 text-slate-900 dark:text-white focus:outline-none focus:border-blue-500"
+                          value={newProduct.youtubeUrl || ''} onChange={e => setNewProduct({ ...newProduct, youtubeUrl: e.target.value })}
+                        />
+                        <p className="text-[10px] text-slate-400">📺 A red "Demo" button will appear on the product card when a YouTube link is added.</p>
                       </div>
 
                       {/* Pricing & Category */}
@@ -710,6 +759,34 @@ const AdminDashboard: React.FC = () => {
                     ))}
                   </tbody>
                 </table>
+              </div>
+            )}
+
+            {/* FEEDBACKS TAB */}
+            {activeTab === 'feedbacks' && (
+              <div className="glass-card p-8 rounded-2xl bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 animate-fade-in-up">
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-6">User Feedback</h3>
+                {feedbacks.length === 0 ? (
+                  <p className="text-slate-500">No feedbacks available yet.</p>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {feedbacks.map(fb => (
+                      <div key={fb.id} className="p-6 border border-slate-200 dark:border-white/10 rounded-xl bg-slate-50 dark:bg-white/5">
+                        <div className="flex justify-between items-start mb-4">
+                          <div>
+                            <h4 className="font-bold text-slate-900 dark:text-white">{fb.userName}</h4>
+                            <p className="text-xs text-slate-500">{fb.userEmail}</p>
+                          </div>
+                          <span className="text-sm font-bold bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400 px-2 py-1 rounded">
+                            {fb.rating} ⭐
+                          </span>
+                        </div>
+                        <p className="text-sm text-slate-600 dark:text-slate-300 italic mb-3">"{fb.comment}"</p>
+                        <p className="text-xs text-slate-400">{new Date(fb.date).toLocaleDateString()}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </>

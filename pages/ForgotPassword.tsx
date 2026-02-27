@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { dbService as db } from '../services/firebaseService';
+import { dbService as db } from '../services/mockDatabase';
 
 const ForgotPassword: React.FC = () => {
   const [step, setStep] = useState<1 | 2 | 3>(1); // 1: Email, 2: OTP, 3: New Password

@@ -6,9 +6,10 @@ export const TDL_PRODUCTS: TDLProduct[] = [
     name: 'Auto-GST Reconciliation Pro',
     description: 'Slash compliance time by 90%. Auto-match GSTR-2B with Tally books instantly.',
     price: 4999,
-    category: Category.GST,
+    category: Category.STATUTORY,
     demoUrl: '#',
     imageUrl: 'https://picsum.photos/seed/gst1/400/300',
+    youtubeUrl: '',
     features: ['1-Click 2B Matching', 'Smart Error Detection', 'Excel Export'],
     active: true
   },
@@ -20,6 +21,7 @@ export const TDL_PRODUCTS: TDLProduct[] = [
     category: Category.SECURITY,
     demoUrl: '#',
     imageUrl: 'https://picsum.photos/seed/sig1/400/300',
+    youtubeUrl: '',
     features: ['DSC Token Support', 'Custom Coordinates', 'Bulk Signing'],
     active: true
   },
@@ -28,9 +30,10 @@ export const TDL_PRODUCTS: TDLProduct[] = [
     name: 'WhatsApp Automation Toolkit',
     description: 'Send invoices, ledgers, and reminders directly from Tally to client WhatsApp.',
     price: 3500,
-    category: Category.AUTOMATION,
+    category: Category.OUTSTANDING,
     demoUrl: '#',
     imageUrl: 'https://picsum.photos/seed/wa1/400/300',
+    youtubeUrl: '',
     features: ['Auto-Payment Reminders', 'Bulk Messaging', 'PDF Attachments'],
     active: true
   },
@@ -42,6 +45,7 @@ export const TDL_PRODUCTS: TDLProduct[] = [
     category: Category.INVENTORY,
     demoUrl: '#',
     imageUrl: 'https://picsum.photos/seed/inv1/400/300',
+    youtubeUrl: '',
     features: ['Visual Aging Graphs', 'Expiry Alerts', 'Re-order Logic'],
     active: true
   }

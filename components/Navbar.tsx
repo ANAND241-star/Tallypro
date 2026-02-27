@@ -23,7 +23,7 @@ const Navbar: React.FC = () => {
 
   const navLinks = [
     { name: 'Home', path: '/' },
-    { name: 'Products', path: '/products' },
+    { name: 'Tally Addons', path: '/products' },
     { name: 'Contact', path: '/contact' },
   ];
 
@@ -57,13 +57,28 @@ const Navbar: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center">
-            <Link to="/" className="flex items-center space-x-2 group">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-cyan-500 rounded-xl flex items-center justify-center font-bold text-xl text-white shadow-lg shadow-blue-500/30 group-hover:scale-105 transition-transform">
-                A
+            <Link to="/" className="flex items-center group">
+              <img
+                src="/logo.png"
+                alt="AndurilTech — Tally Add-ons & Automation"
+                className="h-12 w-auto object-contain group-hover:scale-105 transition-transform duration-200 drop-shadow-lg"
+                onError={(e) => {
+                  // Fallback if logo.png is not yet placed in /public
+                  const target = e.target as HTMLImageElement;
+                  target.style.display = 'none';
+                  const fallback = target.nextElementSibling as HTMLElement;
+                  if (fallback) fallback.style.display = 'flex';
+                }}
+              />
+              {/* Fallback logo — hidden by default, shown if image fails */}
+              <div className="items-center space-x-2 hidden">
+                <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-cyan-500 rounded-xl flex items-center justify-center font-bold text-xl text-white shadow-lg shadow-blue-500/30">
+                  A
+                </div>
+                <span className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">
+                  Anduril<span className="text-blue-500">Tech</span>
+                </span>
               </div>
-              <span className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">
-                Anduril<span className="text-blue-500">Tech</span>
-              </span>
             </Link>
           </div>
 

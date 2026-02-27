@@ -1,10 +1,14 @@
 
 export enum Category {
-  GST = 'GST',
   REPORTS = 'Reports',
-  AUTOMATION = 'Automation',
-  INVENTORY = 'Inventory',
-  SECURITY = 'Security'
+  INVOICING = 'Invoicing',
+  GENERAL = 'General',
+  INVENTORY = 'Inventory Management',
+  OUTSTANDING = 'Outstanding Management',
+  ALERTS = 'Alerts & Controls',
+  STATUTORY = 'Statutory',
+  SECURITY = 'Security',
+  IMPORT = 'Import Utility'
 }
 
 export type LicenseType = 'Single User' | 'Multi User' | 'Lifetime';
@@ -72,6 +76,8 @@ export interface User {
   purchasedProducts?: string[]; // IDs of products
   joinedAt: string;
   password?: string; // Added for auth logic
+  phoneNumber?: string;
+  tallySerial?: string;
 }
 
 export interface Order {
@@ -83,6 +89,8 @@ export interface Order {
   amount: number;
   status: 'success' | 'pending' | 'refunded';
   date: string;
+  phoneNumber?: string;
+  tallySerial?: string;
 }
 
 export interface Ticket {
@@ -97,4 +105,13 @@ export interface Ticket {
 export interface CartItem {
   product: TDLProduct;
   quantity: number;
+}
+
+export interface Feedback {
+  id: string;
+  userName: string;
+  userEmail: string;
+  rating: number;
+  comment: string;
+  date: string;
 }

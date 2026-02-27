@@ -1,7 +1,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User, UserRole } from '../types';
-import { dbService as db } from '../services/firebaseService';
+import { dbService as db } from '../services/mockDatabase';
 
 interface AuthContextType {
   user: User | null;

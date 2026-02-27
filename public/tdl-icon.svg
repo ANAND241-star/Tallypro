@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <!-- Blue rounded square background -->
+  <rect width="128" height="128" rx="22" fill="#1565C0"/>
+
+  <!-- Inner lighter overlay for depth -->
+  <rect x="4" y="4" width="120" height="120" rx="19" fill="#1976D2"/>
+
+  <!-- Left bracket [ -->
+  <rect x="18" y="28" width="7" height="52" rx="2" fill="white"/>
+  <rect x="18" y="28" width="20" height="7" rx="2" fill="white"/>
+  <rect x="18" y="73" width="20" height="7" rx="2" fill="white"/>
+
+  <!-- Colon : -->
+  <circle cx="55" cy="44" r="5.5" fill="white"/>
+  <circle cx="55" cy="64" r="5.5" fill="white"/>
+
+  <!-- Right side: + symbol -->
+  <rect x="70" y="42" width="6" height="24" rx="2" fill="white"/>
+  <rect x="61" y="51" width="24" height="6" rx="2" fill="white"/>
+
+  <!-- Arrow ↗ at bottom right -->
+  <g transform="translate(80, 78)">
+    <!-- Arrow line -->
+    <line x1="4" y1="28" x2="24" y2="8" stroke="white" stroke-width="5" stroke-linecap="round"/>
+    <!-- Arrow head -->
+    <polyline points="10,8 24,8 24,22" fill="none" stroke="white" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>

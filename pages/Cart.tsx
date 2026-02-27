@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
-import { dbService as db } from '../services/firebaseService';
+import { dbService as db } from '../services/mockDatabase';
 import { openCheckout } from '../services/razorpayService';
 
 const Cart: React.FC = () => {
@@ -13,15 +13,69 @@ const Cart: React.FC = () => {
     const { showToast } = useToast();
     const navigate = useNavigate();
     const [purchasingId, setPurchasingId] = React.useState<string | null>(null);
+    const [guestModal, setGuestModal] = React.useState<{ product: any } | null>(null);
+    const [guestInfo, setGuestInfo] = React.useState({ email: '', phone: '', tallySerial: '' });
+    const [feedbackModal, setFeedbackModal] = React.useState<{ name: string, email: string } | null>(null);
+    const [feedbackForm, setFeedbackForm] = React.useState({ rating: 5, comment: '' });
+    const [submittingFeedback, setSubmittingFeedback] = React.useState(false);
 
-    const handleBuyItem = async (productId: string) => {
+    const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+    const isValidPhone = (phone: string) => /^[0-9]{10}$/.test(phone.trim());
+
+    const submitFeedback = async () => {
+        if (!feedbackModal) return;
+        setSubmittingFeedback(true);
+        await db.createFeedback(feedbackModal.name, feedbackModal.email, feedbackForm.rating, feedbackForm.comment);
+        setSubmittingFeedback(false);
+        setFeedbackModal(null);
+        setFeedbackForm({ rating: 5, comment: '' });
+        showToast('Thank you for your feedback!', 'success');
+        if (isAuthenticated) navigate('/dashboard');
+    };
+
+    const skipFeedback = () => {
+        setFeedbackModal(null);
+        setFeedbackForm({ rating: 5, comment: '' });
+        if (isAuthenticated) navigate('/dashboard');
+    };
+
+    const handleBuyItem = async (productId: string, info?: { email: string, phone: string, tallySerial: string }) => {
         const cartItem = cartItems.find(i => i.product.id === productId);
         if (!cartItem) return;
 
         if (!isAuthenticated || !user) {
-            if (confirm("You need to login to purchase. Go to login?")) {
-                navigate('/login');
+            if (!info) {
+                setGuestModal({ product: cartItem.product });
+                return;
             }
+
+            if (!isValidEmail(info.email)) {
+                showToast('Please enter a valid email address', 'error');
+                return;
+            }
+            if (!isValidPhone(info.phone)) {
+                showToast('Please enter a valid 10-digit mobile number', 'error');
+                return;
+            }
+
+            setPurchasingId(productId);
+            setGuestModal(null);
+            await openCheckout(
+                cartItem.product,
+                { id: info.email, name: info.email.split('@')[0], email: info.email, phoneNumber: info.phone } as any,
+                async () => {
+                    await db.createGuestOrder(info.email, cartItem.product, { phoneNumber: info.phone, tallySerial: info.tallySerial });
+                    removeFromCart(productId);
+                    showToast(`Purchase successful! Receipt sent to ${info.email}`, 'success');
+                    setGuestInfo({ email: '', phone: '', tallySerial: '' });
+                    setPurchasingId(null);
+                    setFeedbackModal({ name: info.email.split('@')[0], email: info.email });
+                },
+                (error) => {
+                    showToast(error.description || 'Payment failed', 'error');
+                    setPurchasingId(null);
+                }
+            );
             return;
         }
 
@@ -41,7 +95,7 @@ const Cart: React.FC = () => {
                     await refreshUser();
                     removeFromCart(productId);
                     showToast(`Purchase Successful! Ref: ${paymentId}`, "success");
-                    navigate('/dashboard');
+                    setFeedbackModal({ name: user.name, email: user.email });
                 } else {
                     showToast("Payment success but order creation failed. Contact support.", "error");
                 }
@@ -137,8 +191,8 @@ const Cart: React.FC = () => {
                                         onClick={() => handleBuyItem(product.id)}
                                         disabled={purchasingId === product.id || !!isOwned}
                                         className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${isOwned
-                                                ? 'bg-green-600 text-white cursor-not-allowed opacity-70'
-                                                : 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/20 disabled:opacity-70 disabled:cursor-wait'
+                                            ? 'bg-green-600 text-white cursor-not-allowed opacity-70'
+                                            : 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/20 disabled:opacity-70 disabled:cursor-wait'
                                             }`}
                                     >
                                         {purchasingId === product.id ? 'Processing...' : isOwned ? 'Owned ✓' : 'Buy Now'}
@@ -173,6 +227,138 @@ const Cart: React.FC = () => {
                 </div>
                 <p className="text-xs text-slate-400 mt-3">Purchase each item individually using the Buy Now buttons above.</p>
             </div>
+            {/* Direct Purchase Modal */}
+            {guestModal && (
+                <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
+                    <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl p-8 shadow-2xl border border-slate-200 dark:border-white/10 animate-fade-in-up">
+                        <div className="text-center mb-6">
+                            <div className="w-14 h-14 bg-blue-600/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <svg className="w-7 h-7 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 118 0v4M5 9h14l1 12H4L5 9z" />
+                                </svg>
+                            </div>
+                            <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-1">Direct Purchase</h2>
+                            <p className="text-slate-500 dark:text-slate-400 text-sm">
+                                Buying <span className="font-semibold text-blue-600">{guestModal.product.name}</span>
+                            </p>
+                        </div>
+
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Gmail / Email *</label>
+                                <input
+                                    type="email"
+                                    value={guestInfo.email}
+                                    onChange={(e) => setGuestInfo({ ...guestInfo, email: e.target.value })}
+                                    placeholder="yourname@gmail.com"
+                                    className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-blue-500 transition-colors"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Mobile Number *</label>
+                                <input
+                                    type="tel"
+                                    value={guestInfo.phone}
+                                    onChange={(e) => setGuestInfo({ ...guestInfo, phone: e.target.value })}
+                                    placeholder="10-digit mobile number"
+                                    className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-blue-500 transition-colors"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Tally Serial Number (Optional)</label>
+                                <input
+                                    type="text"
+                                    value={guestInfo.tallySerial}
+                                    onChange={(e) => setGuestInfo({ ...guestInfo, tallySerial: e.target.value })}
+                                    placeholder="e.g. 712345678"
+                                    className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-blue-500 transition-colors"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="flex gap-3 mt-8">
+                            <button
+                                onClick={() => { setGuestModal(null); setGuestInfo({ email: '', phone: '', tallySerial: '' }); }}
+                                className="flex-1 py-3 rounded-xl border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 font-semibold hover:bg-slate-50 dark:hover:bg-white/5 transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={() => handleBuyItem(guestModal.product.id, guestInfo)}
+                                disabled={!isValidEmail(guestInfo.email) || !isValidPhone(guestInfo.phone)}
+                                className="flex-1 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold transition-colors disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-blue-500/25"
+                            >
+                                Pay ₹{guestModal.product.price.toLocaleString('en-IN')}
+                            </button>
+                        </div>
+                        <p className="text-center text-xs text-slate-400 mt-4">
+                            Instant delivery to your email after payment.
+                        </p>
+                    </div>
+                </div>
+            )}
+            {/* Feedback Modal */}
+            {feedbackModal && (
+                <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
+                    <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl p-8 shadow-2xl border border-slate-200 dark:border-white/10 animate-fade-in-up">
+                        <div className="text-center mb-6">
+                            <div className="w-14 h-14 bg-green-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <span className="text-3xl">🎉</span>
+                            </div>
+                            <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-1">How was your experience?</h2>
+                            <p className="text-slate-500 dark:text-slate-400 text-sm">
+                                Your feedback helps us improve our Tally Addons
+                            </p>
+                        </div>
+
+                        <div className="space-y-6">
+                            <div>
+                                <label className="block text-center text-sm font-bold text-slate-700 dark:text-slate-300 mb-3">Rate your experience</label>
+                                <div className="flex justify-center gap-2">
+                                    {[1, 2, 3, 4, 5].map((star) => (
+                                        <button
+                                            key={star}
+                                            onClick={() => setFeedbackForm({ ...feedbackForm, rating: star })}
+                                            className={`text-3xl transition-transform hover:scale-110 ${feedbackForm.rating >= star ? 'text-yellow-400' : 'text-slate-200 dark:text-slate-700'}`}
+                                        >
+                                            ★
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Any comments? (Optional)</label>
+                                <textarea
+                                    value={feedbackForm.comment}
+                                    onChange={(e) => setFeedbackForm({ ...feedbackForm, comment: e.target.value })}
+                                    placeholder="Tell us what you liked or how we can improve..."
+                                    rows={3}
+                                    className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-blue-500 transition-colors resize-none"
+                                />
+                            </div>
+
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={skipFeedback}
+                                    className="flex-1 py-3 rounded-xl border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 font-semibold hover:bg-slate-50 dark:hover:bg-white/5 transition-colors"
+                                >
+                                    Skip
+                                </button>
+                                <button
+                                    onClick={submitFeedback}
+                                    disabled={submittingFeedback}
+                                    className="flex-[2] py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold transition-colors disabled:opacity-40 disabled:cursor-wait shadow-lg shadow-blue-500/25"
+                                >
+                                    {submittingFeedback ? 'Submitting...' : 'Submit Feedback'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

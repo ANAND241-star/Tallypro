@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
-import { dbService as db } from '../../services/firebaseService';
+import { dbService as db } from '../../services/mockDatabase';
 import { TDLProduct, Ticket } from '../../types';
 
 type DashboardTab = 'downloads' | 'support' | 'settings';
