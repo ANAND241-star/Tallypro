@@ -1,0 +1,8 @@
+{
+  "name": "AndurilTech - Tally Developer & Accounting Services",
+  "description": "High-conversion platform for Tally TDL products, automation, and compliance services for Indian MSMEs and CA firms.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
