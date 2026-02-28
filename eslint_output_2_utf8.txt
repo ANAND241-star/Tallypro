@@ -1,0 +1,7 @@
+﻿
+C:\Users\pjat9\Downloads\Tallypro-main (1)\Tallypro-main\pages\dashboard\UserDashboard.tsx
+   91:14  warning  '_error' is defined but never used  @typescript-eslint/no-unused-vars
+  125:14  warning  '_error' is defined but never used  @typescript-eslint/no-unused-vars
+
+Γ£û 2 problems (0 errors, 2 warnings)
+

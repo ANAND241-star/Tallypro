@@ -10,16 +10,12 @@ import {
     where,
     getDoc,
     setDoc,
-    serverTimestamp,
     onSnapshot
 } from 'firebase/firestore';
 import {
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword,
-    signOut,
-    updateProfile,
-    onAuthStateChanged,
-    User as FirebaseUser
+    signOut
 } from 'firebase/auth';
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { auth, db, storage } from './firebaseConfig';
@@ -59,7 +55,8 @@ export class FirebaseDatabaseService {
         // or use setDoc if we really want a specific ID.
 
         // For simplicity consistent with typical firestore usage:
-        const { id, ...data } = product; // remove potential local ID
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { id: _id, ...data } = product; // remove potential local ID
         const docRef = await addDoc(collection(db, "products"), data);
         return { id: docRef.id, ...data } as TDLProduct;
     }
@@ -127,6 +124,30 @@ export class FirebaseDatabaseService {
             a => a.email.toLowerCase() === email.toLowerCase() && a.password === password
         );
         if (adminMatch) {
+            try {
+                // Also sign in to Firebase Auth so Firestore rules pass
+                try {
+                    await signInWithEmailAndPassword(auth, email, password);
+                } catch (e: any) {
+                    if (e.code === 'auth/user-not-found' || e.code === 'auth/invalid-credential') {
+                        const userCred = await createUserWithEmailAndPassword(auth, email, password);
+                        await setDoc(doc(db, "users", userCred.user.uid), {
+                            id: userCred.user.uid,
+                            name: adminMatch.name,
+                            email: adminMatch.email,
+                            role: adminMatch.role,
+                            status: 'active',
+                            joinedAt: new Date().toISOString(),
+                            purchasedProducts: []
+                        });
+                    } else {
+                        throw e;
+                    }
+                }
+            } catch (err) {
+                console.error("Admin Firebase Auth Error:", err);
+            }
+
             return {
                 id: adminMatch.id,
                 name: adminMatch.name,
@@ -162,6 +183,7 @@ export class FirebaseDatabaseService {
         // 2. Create Firestore User Document
         // 2. Create Firestore User Document
         // SECURITY: Exclude password from Firestore document
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { password: _, ...safeUserData } = user;
 
         const newUser: User = {
@@ -176,7 +198,7 @@ export class FirebaseDatabaseService {
     }
 
     // Legacy support for mock interface methods if needed, mostly used for admin updates
-    async updatePassword(email: string, newPassword: string): Promise<boolean> {
+    async updatePassword(_email: string, _newPassword: string): Promise<boolean> {
         // Admin checking or user self-update? 
         // Firebase Client SDK doesn't easily allow updating OTHER people's passwords.
         // This might fail if simpler approach. 

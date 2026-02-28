@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 
@@ -9,7 +9,6 @@ const OTPLogin: React.FC = () => {
   const [step, setStep] = useState<'email' | 'otp'>('email');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [otpSent, setOtpSent] = useState(false);
   const [countdown, setCountdown] = useState(0);
 
   const { loginWithOTP, generateOTP } = useAuth();
@@ -30,7 +29,6 @@ const OTPLogin: React.FC = () => {
     setLoading(true);
     try {
       await generateOTP(email);
-      setOtpSent(true);
       setStep('otp');
       setCountdown(60); // 60 seconds countdown
 
@@ -66,7 +64,7 @@ const OTPLogin: React.FC = () => {
       } else {
         setError('Invalid OTP. Please try again.');
       }
-    } catch (err) {
+    } catch {
       setError('Login failed. Please try again.');
     } finally {
       setLoading(false);
@@ -93,7 +91,7 @@ const OTPLogin: React.FC = () => {
       }, 1000);
 
       showToast('New OTP sent!', 'success');
-    } catch (err) {
+    } catch {
       setError('Failed to resend OTP. Please try again.');
     } finally {
       setLoading(false);

@@ -156,7 +156,7 @@ const Cart: React.FC = () => {
                         >
                             {/* Product Image */}
                             <div className="w-24 h-20 rounded-xl overflow-hidden flex-shrink-0">
-                                <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" />
+                                <img src={product.imageUrl} alt={product.name} loading="lazy" className="w-full h-full object-cover" />
                             </div>
 
                             {/* Info */}

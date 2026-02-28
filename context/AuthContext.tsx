@@ -1,6 +1,6 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { User, UserRole } from '../types';
+import { User } from '../types';
 import { dbService as db } from '../services/firebaseService';
 
 interface AuthContextType {
@@ -57,6 +57,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (user) {
       const updatedUser = await db.getUserByEmail(user.email);
       if (updatedUser) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { password: _, ...safeUser } = updatedUser as any;
         setUser(safeUser);
         localStorage.setItem('anduriltech_session', JSON.stringify(safeUser));
@@ -69,6 +70,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     if (requiredRole === 'admin') {
       if (dbUser && (dbUser.role === 'admin' || dbUser.role === 'super_admin')) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { password: _, ...safeUser } = dbUser as any;
         setUser(safeUser);
         localStorage.setItem('anduriltech_session', JSON.stringify(safeUser));
@@ -84,6 +86,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
       if (dbUser) {
         if (dbUser.status === 'inactive') return false;
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { password: _, ...safeUser } = dbUser as any;
         setUser(safeUser);
         localStorage.setItem('anduriltech_session', JSON.stringify(safeUser));
@@ -108,6 +111,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         purchasedProducts: []
       };
       const createdUser = await db.signup(newUser, password);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { password: _, ...safeCreatedUser } = createdUser as any;
       setUser(safeCreatedUser);
       localStorage.setItem('anduriltech_session', JSON.stringify(safeCreatedUser));
@@ -130,6 +134,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const dbUser = await db.loginWithOTP(email, code);
       if (dbUser) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { password: _, ...safeUser } = dbUser as any;
         setUser(safeUser);
         localStorage.setItem('anduriltech_session', JSON.stringify(safeUser));

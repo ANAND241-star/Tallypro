@@ -31,7 +31,7 @@ const ForgotPassword: React.FC = () => {
       } else {
         setError("Email address not found in our records.");
       }
-    } catch (e) {
+    } catch {
       setError("Network error. Please try again.");
     } finally {
       setLoading(false);
@@ -76,7 +76,7 @@ const ForgotPassword: React.FC = () => {
       } else {
         setError("Failed to update password. Try again.");
       }
-    } catch (e) {
+    } catch {
       setError("Network Error");
     } finally {
       setLoading(false);

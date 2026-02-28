@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { Category, TDLProduct } from '../types';
 import { useAuth } from '../context/AuthContext';
@@ -100,7 +100,7 @@ const Products: React.FC = () => {
     await openCheckout(
       product,
       user,
-      async (paymentId) => {
+      async (_paymentId) => {
         showToast(`Payment Successful! Click Download to receive your file.`, 'success');
         setPurchasingId(null);
         setPurchasedSessionProducts(prev => ({ ...prev, [product.id]: { isAuthenticated: true } }));
@@ -266,6 +266,7 @@ const Products: React.FC = () => {
                   <img
                     src={getCacheBustedImageUrl(p.imageUrl, p.updatedAt) || 'https://picsum.photos/seed/' + p.id + '/400/300'}
                     alt={p.name}
+                    loading="lazy"
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                     onError={(e) => { (e.target as HTMLImageElement).src = 'https://picsum.photos/seed/' + p.id + '/400/300'; }}
                   />

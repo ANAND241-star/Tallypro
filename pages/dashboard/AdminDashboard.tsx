@@ -42,8 +42,8 @@ const AdminDashboard: React.FC = () => {
   });
   const [loadingFile, setLoadingFile] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const [mainFile, setMainFile] = useState<File | null>(null);
-  const [demoFile, setDemoFile] = useState<File | null>(null);
+  const [, setMainFile] = useState<File | null>(null);
+  const [, setDemoFile] = useState<File | null>(null);
 
   // Fetch Data
   useEffect(() => {

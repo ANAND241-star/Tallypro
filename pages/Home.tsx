@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { SERVICES, TESTIMONIALS, STATS, PROBLEM_SOLUTION, TDL_PRODUCTS } from '../constants';
+import { SERVICES, TESTIMONIALS, STATS, PROBLEM_SOLUTION } from '../constants';
 
 const FAQ_ITEMS = [
   {

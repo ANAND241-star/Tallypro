@@ -23,7 +23,7 @@ const Login: React.FC = () => {
       } else {
         setError('Invalid credentials or account inactive.');
       }
-    } catch (err) {
+    } catch {
       setError('Login failed. Please try again.');
     } finally {
       setLoading(false);

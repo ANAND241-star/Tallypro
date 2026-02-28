@@ -88,7 +88,7 @@ const UserDashboard: React.FC = () => {
       await db.updateUserProfile(user.id, { name: profileName });
       await refreshUser();
       showToast("Profile name updated successfully", "success");
-    } catch (error) {
+    } catch {
       showToast("Failed to update profile", "error");
     } finally {
       setUpdating(false);
@@ -122,7 +122,7 @@ const UserDashboard: React.FC = () => {
       await db.updatePassword(user.email, passwords.new);
       setPasswords({ current: '', new: '', confirm: '' });
       showToast("Password changed successfully", "success");
-    } catch (error) {
+    } catch {
       showToast("Error changing password", "error");
     } finally {
       setUpdating(false);
@@ -189,7 +189,7 @@ const UserDashboard: React.FC = () => {
                   <div key={product.id} className="glass-card p-6 rounded-2xl border border-slate-200 dark:border-white/10 flex flex-col md:flex-row items-center justify-between gap-6 bg-white dark:bg-white/5">
                     <div className="flex items-center gap-6 w-full md:w-auto">
                       <div className="w-16 h-16 rounded-xl bg-slate-100 dark:bg-slate-800 overflow-hidden flex-shrink-0">
-                        <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" />
+                        <img src={product.imageUrl} alt={product.name} loading="lazy" className="w-full h-full object-cover" />
                       </div>
                       <div>
                         <h3 className="text-lg font-bold text-slate-900 dark:text-white">{product.name}</h3>
