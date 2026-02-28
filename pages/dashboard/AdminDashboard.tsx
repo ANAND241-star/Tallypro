@@ -91,33 +91,44 @@ const AdminDashboard: React.FC = () => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Size limit check (10MB)
-    if (file.size > 10 * 1024 * 1024) {
-      showToast("File size too large. Maximum 10MB allowed.", "error");
+    // Size limit check (1MB) - Firestore Doc Limit
+    if (file.size > 1 * 1024 * 1024) {
+      showToast("File size too large. Maximum 1MB allowed for Database storage.", "error");
       e.target.value = '';
       return;
     }
 
     setLoadingFile(true);
+    const reader = new FileReader();
 
-    // Store raw file for upload
-    if (field === 'main') {
-      setMainFile(file);
-      setNewProduct(prev => ({
-        ...prev,
-        fileName: file.name,
-        fileSize: (file.size / 1024).toFixed(2) + ' KB'
-      }));
-    } else {
-      setDemoFile(file);
-      setNewProduct(prev => ({
-        ...prev,
-        demoFileName: file.name,
-      }));
-    }
+    reader.onloadend = () => {
+      const base64Data = reader.result as string;
+      if (field === 'main') {
+        setMainFile(file);
+        setNewProduct(prev => ({
+          ...prev,
+          fileName: file.name,
+          fileSize: (file.size / 1024).toFixed(2) + ' KB',
+          fileData: base64Data
+        }));
+      } else {
+        setDemoFile(file);
+        setNewProduct(prev => ({
+          ...prev,
+          demoFileName: file.name,
+          demoFileData: base64Data
+        }));
+      }
+      setLoadingFile(false);
+      showToast("File processed successfully", "success");
+    };
 
-    setLoadingFile(false);
-    showToast("File selected ready for upload", "success");
+    reader.onerror = () => {
+      showToast("Error reading file", "error");
+      setLoadingFile(false);
+    };
+
+    reader.readAsDataURL(file);
   };
 
   const handleEditProduct = (product: TDLProduct) => {
@@ -133,20 +144,11 @@ const AdminDashboard: React.FC = () => {
     if (newProduct.name && newProduct.price) {
       setLoadingFile(true);
       try {
-        let mainFileUrl = newProduct.fileData; // Keep existing if not changed
+        let mainFileUrl = newProduct.fileData; // Keeping base64 or link
         let demoFileUrl = newProduct.demoFileData;
 
-        // Upload Main File if new one selected
-        if (mainFile) {
-          const path = `products/${Date.now()}_${mainFile.name}`;
-          mainFileUrl = await db.uploadFile(mainFile, path, (p) => setUploadProgress(p));
-        }
-
-        // Upload Demo File if new one selected
-        if (demoFile) {
-          const path = `demos/${Date.now()}_${demoFile.name}`;
-          demoFileUrl = await db.uploadFile(demoFile, path, (p) => setUploadProgress(p));
-        }
+        // Note: No Firebase Storage upload needed for Spark Plan.
+        // Files are already converted to Base64 in handleFileUpload and stored in newProduct.
 
         const productData = {
           ...newProduct,
@@ -536,7 +538,7 @@ const AdminDashboard: React.FC = () => {
                               value={newProduct.fileData || ''}
                               onChange={(e) => setNewProduct({ ...newProduct, fileData: e.target.value, fileName: 'External Link', fileSize: 'N/A' })}
                             />
-                            <p className="text-[10px] text-slate-400">Paste the sharing link of your file here.</p>
+                            <p className="text-[10px] text-slate-400">Paste the sharing link of your file here (or use direct upload below).</p>
                           </div>
 
                           {/* Demo File URL */}
@@ -553,8 +555,8 @@ const AdminDashboard: React.FC = () => {
                         </div>
 
                         {/* Divider for manual upload (Hidden for now to avoid confusion as per user request) */}
-                        <div className="hidden border-t border-slate-200 dark:border-white/10 pt-6 mt-6">
-                          <label className="text-sm font-bold text-slate-900 dark:text-white block mb-4">OR Upload Directly (Optional)</label>
+                        <div className="border-t border-slate-200 dark:border-white/10 pt-6 mt-6">
+                          <label className="text-sm font-bold text-slate-900 dark:text-white block mb-4">OR Direct File Upload (Best for TDL/TXT)</label>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             {/* Main File */}
                             <div className="p-4 border-2 border-dashed border-slate-300 dark:border-white/20 rounded-xl bg-slate-50 dark:bg-white/5 hover:border-blue-500 transition-colors">
