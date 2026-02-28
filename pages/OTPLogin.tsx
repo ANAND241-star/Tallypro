@@ -46,8 +46,8 @@ const OTPLogin: React.FC = () => {
       }, 1000);
 
       showToast('OTP sent to your email!', 'success');
-    } catch (err) {
-      setError('Failed to send OTP. Please try again.');
+    } catch (err: any) {
+      setError(err?.message || 'Failed to send OTP. Please try again.');
     } finally {
       setLoading(false);
     }

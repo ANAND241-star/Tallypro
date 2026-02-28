@@ -493,9 +493,11 @@ export class FirebaseDatabaseService {
             //     subject: 'Your AndurilTech OTP Code'
             // });
 
-        } catch (error) {
+        } catch (error: any) {
             console.error('Failed to send OTP email:', error);
-            throw new Error('Failed to send OTP email');
+            const errorMsg = error?.text || error?.message || JSON.stringify(error) || 'Unknown error';
+            alert(`EmailJS Error: ${errorMsg}`);
+            throw new Error(`Failed to send OTP email: ${errorMsg}`);
         }
     }
 
