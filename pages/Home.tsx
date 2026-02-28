@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { SERVICES, TESTIMONIALS, STATS, PROBLEM_SOLUTION, TDL_PRODUCTS } from '../constants';
 
 const FAQ_ITEMS = [
@@ -43,6 +44,10 @@ const Home: React.FC = () => {
 
   return (
     <div className="relative overflow-hidden bg-slate-50 dark:bg-dark text-slate-900 dark:text-white transition-colors duration-300">
+      <Helmet>
+        <title>Best Tally TDL Developer & Tailored Accounts Automation | AndurilTech</title>
+        <meta name="description" content="Discover India's best Tally TDL developer for custom Tally Prime addons, Auto-GST Reconciliation, WhatsApp integrations, and specialized accounting solutions." />
+      </Helmet>
 
       {/* 1. HERO SECTION */}
       <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto flex flex-col items-center text-center">
@@ -52,11 +57,11 @@ const Home: React.FC = () => {
 
         <div className="animate-fade-in-up">
           <span className="inline-block py-1 px-3 rounded-full bg-blue-100 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20 text-blue-600 dark:text-blue-400 text-xs font-bold tracking-wider uppercase mb-6">
-            #1 Tally Automation Partner
+            #1 Tally Customization Partner
           </span>
           <h1 className="text-5xl lg:text-7xl font-bold tracking-tight leading-[1.1] mb-8">
-            Build Powerful TDLs.<br />
-            <span className="text-gradient">Automate Tally.</span> Grow Faster.
+            Best Tally TDL Developer.<br />
+            <span className="text-gradient">Automate Tally Prime.</span>
           </h1>
           <p className="max-w-2xl mx-auto text-lg text-slate-600 dark:text-slate-400 mb-10 leading-relaxed">
             Stop wasting time on manual data entry. We provide high-performance TDL solutions and expert accounting services tailored for modern Indian businesses.
@@ -99,7 +104,7 @@ const Home: React.FC = () => {
       {/* 3. PROBLEM / SOLUTION */}
       <section className="py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-5xl font-bold text-slate-900 dark:text-white mb-4">Why Businesses Choose Us</h2>
+          <h2 className="text-3xl md:text-5xl font-bold text-slate-900 dark:text-white mb-4">Why Tally Customization Services Matter</h2>
           <p className="text-slate-500 dark:text-slate-400 max-w-2xl mx-auto">We bridge the gap between complex accounting requirements and simple, automated workflows.</p>
         </div>
 
@@ -225,7 +230,7 @@ const Home: React.FC = () => {
                 Browse TDL Products
               </Link>
               <a href="https://wa.me/919587742740" target="_blank" rel="noopener noreferrer" className="px-10 py-4 bg-transparent border border-white/30 text-white font-bold rounded-xl hover:bg-white/10 transition-all flex items-center justify-center gap-2">
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.246 2.248 3.484 5.232 3.484 8.412 0 6.556-5.338 11.892-11.893 11.892-1.997-.001-3.951-.5-5.688-1.448l-6.309 1.656zm6.224-3.82l.303.18c1.397.831 3.013 1.27 4.673 1.271 5.233 0 9.492-4.258 9.495-9.493.002-2.537-.987-4.922-2.787-6.723s-4.187-2.79-6.723-2.791c-5.233 0-9.491 4.258-9.494 9.493-.001 2.133.569 4.212 1.648 6.007l.199.333-1.082 3.95 4.04-1.06z"/></svg>
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.246 2.248 3.484 5.232 3.484 8.412 0 6.556-5.338 11.892-11.893 11.892-1.997-.001-3.951-.5-5.688-1.448l-6.309 1.656zm6.224-3.82l.303.18c1.397.831 3.013 1.27 4.673 1.271 5.233 0 9.492-4.258 9.495-9.493.002-2.537-.987-4.922-2.787-6.723s-4.187-2.79-6.723-2.791c-5.233 0-9.491 4.258-9.494 9.493-.001 2.133.569 4.212 1.648 6.007l.199.333-1.082 3.95 4.04-1.06z" /></svg>
                 WhatsApp Enquiry
               </a>
             </div>

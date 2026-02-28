@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { Category, TDLProduct } from '../types';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
@@ -168,6 +169,10 @@ const Products: React.FC = () => {
 
   return (
     <div className="pt-32 pb-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto min-h-screen bg-slate-50 dark:bg-dark transition-colors">
+      <Helmet>
+        <title>Premium Tally Prime Addons & Custom TDLs | AndurilTech</title>
+        <meta name="description" content="Browse our collection of premium Tally Prime addons, including Auto-GST Reconciliation, WhatsApp Integration, and Smart Inventory modules." />
+      </Helmet>
 
       {/* Header */}
       <div className="text-center mb-16 animate-fade-in-up">
@@ -175,7 +180,7 @@ const Products: React.FC = () => {
           Tally Addons Store
         </span>
         <h1 className="text-4xl lg:text-6xl font-bold text-slate-900 dark:text-white mb-6">
-          Premium <span className="text-gradient">Tally Addons</span>
+          Premium <span className="text-gradient">Tally Prime Addons</span>
         </h1>
         <p className="text-slate-500 dark:text-slate-400 text-lg max-w-2xl mx-auto">
           Industrial-grade Tally extensions. Instant download. Expert support included.

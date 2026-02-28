@@ -1,5 +1,5 @@
-
 import React, { useState } from 'react';
+import { Helmet } from 'react-helmet-async';
 
 const WHATSAPP_NUMBER = '919587742740';
 const CONTACT_EMAIL = 'anandjatt689@gmail.com';
@@ -49,12 +49,17 @@ const Contact: React.FC = () => {
 
   return (
     <div className="pt-32 pb-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto bg-slate-50 dark:bg-dark transition-colors min-h-screen">
+      <Helmet>
+        <title>Contact the Best Tally TDL Developer | AndurilTech</title>
+        <meta name="description" content="Get in touch for custom Tally ERP and Prime addons, support, or general inquiries. We respond within 1 hour." />
+      </Helmet>
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
 
         {/* Info Column */}
         <div className="animate-fade-in-up">
           <h1 className="text-4xl lg:text-6xl font-bold text-slate-900 dark:text-white mb-6">
-            Let's <span className="text-gradient">Connect</span>
+            Contact Tally <span className="text-gradient">Experts</span>
           </h1>
           <p className="text-slate-500 dark:text-slate-400 text-lg mb-12 leading-relaxed">
             Have a question about a Tally Addon? Or need a custom solution?

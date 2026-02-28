@@ -14,6 +14,7 @@ import NotFound from './pages/NotFound';
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider } from './context/AuthContext';
 import { ToastProvider } from './context/ToastContext';
+import { HelmetProvider } from 'react-helmet-async';
 import { CartProvider } from './context/CartContext';
 import Cart from './pages/Cart';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -43,45 +44,47 @@ const WhatsAppButton: React.FC = () => (
 
 const App: React.FC = () => {
   return (
-    <ThemeProvider>
-      <ToastProvider>
-        <AuthProvider>
-          <CartProvider>
-            <Router>
-              <div className="flex flex-col min-h-screen">
-                <ScrollToTop />
-                <Navbar />
-                <main className="flex-grow">
-                  <Routes>
-                    <Route path="/" element={<Home />} />
-                    <Route path="/products" element={<Products />} />
-                    <Route path="/cart" element={<Cart />} />
-                    <Route path="/contact" element={<Contact />} />
+    <HelmetProvider>
+      <ThemeProvider>
+        <ToastProvider>
+          <AuthProvider>
+            <CartProvider>
+              <Router>
+                <div className="flex flex-col min-h-screen">
+                  <ScrollToTop />
+                  <Navbar />
+                  <main className="flex-grow">
+                    <Routes>
+                      <Route path="/" element={<Home />} />
+                      <Route path="/products" element={<Products />} />
+                      <Route path="/cart" element={<Cart />} />
+                      <Route path="/contact" element={<Contact />} />
 
-                    <Route path="/login" element={<OTPLogin />} />
-                    <Route path="/otp-login" element={<OTPLogin />} />
-                    <Route path="/admin-login" element={<AdminLogin />} />
-                    <Route path="/dashboard" element={
-                      <ProtectedRoute>
-                        <UserDashboard />
-                      </ProtectedRoute>
-                    } />
-                    <Route path="/admin" element={
-                      <ProtectedRoute requiredRole="admin">
-                        <AdminDashboard />
-                      </ProtectedRoute>
-                    } />
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
-                </main>
-                <Footer />
-                <WhatsAppButton />
-              </div>
-            </Router>
-          </CartProvider>
-        </AuthProvider>
-      </ToastProvider>
-    </ThemeProvider>
+                      <Route path="/login" element={<OTPLogin />} />
+                      <Route path="/otp-login" element={<OTPLogin />} />
+                      <Route path="/admin-login" element={<AdminLogin />} />
+                      <Route path="/dashboard" element={
+                        <ProtectedRoute>
+                          <UserDashboard />
+                        </ProtectedRoute>
+                      } />
+                      <Route path="/admin" element={
+                        <ProtectedRoute requiredRole="admin">
+                          <AdminDashboard />
+                        </ProtectedRoute>
+                      } />
+                      <Route path="*" element={<NotFound />} />
+                    </Routes>
+                  </main>
+                  <Footer />
+                  <WhatsAppButton />
+                </div>
+              </Router>
+            </CartProvider>
+          </AuthProvider>
+        </ToastProvider>
+      </ThemeProvider>
+    </HelmetProvider>
   );
 };
 
