@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Allow: /products
+Allow: /contact
+Allow: /login
+Allow: /signup
+Disallow: /admin
+Disallow: /dashboard
+
+Sitemap: https://anduriltech.com/sitemap.xml
