@@ -16,7 +16,8 @@ import {
     signInWithEmailAndPassword,
     signOut,
     GoogleAuthProvider,
-    signInWithPopup
+    signInWithPopup,
+    sendPasswordResetEmail
 } from 'firebase/auth';
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { auth, db, storage } from './firebaseConfig';
@@ -174,12 +175,13 @@ export class FirebaseDatabaseService {
 
     // Legacy support for mock interface methods if needed, mostly used for admin updates
     async updatePassword(_email: string, _newPassword: string): Promise<boolean> {
-        // Admin checking or user self-update? 
-        // Firebase Client SDK doesn't easily allow updating OTHER people's passwords.
-        // This might fail if simpler approach. 
-        // For now, return false or needs Admin SDK (Cloud Functions).
         console.warn("Update Password via Client SDK for arbitrary user is not supported directly without re-auth");
         return false;
+    }
+
+    // Trigger Firebase Password Reset Email
+    async resetPassword(email: string): Promise<void> {
+        await sendPasswordResetEmail(auth, email);
     }
 
     // Guest purchase — no login needed, just email

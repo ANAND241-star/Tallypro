@@ -14,6 +14,7 @@ interface AuthContextType {
   needsFeedback: boolean;
   setNeedsFeedback: (val: boolean) => void;
   loginWithGoogle: () => Promise<boolean>;
+  resetPassword: (email: string) => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -147,6 +148,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const resetPassword = async (email: string): Promise<boolean> => {
+    try {
+      await db.resetPassword(email);
+      return true;
+    } catch (error) {
+      console.error('Password reset error:', error);
+      throw error;
+    }
+  }
+
   return (
     <AuthContext.Provider value={{
       user,
@@ -158,7 +169,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       isAdmin: user?.role === 'super_admin' || user?.role === 'admin',
       needsFeedback,
       setNeedsFeedback,
-      loginWithGoogle
+      loginWithGoogle,
+      resetPassword
     }}>
       {children}
     </AuthContext.Provider>

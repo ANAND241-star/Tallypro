@@ -382,6 +382,11 @@ class CloudDatabaseService {
 
     return user;
   }
+
+  async resetPassword(email: string): Promise<void> {
+    console.log(`Mock: Sent password reset email to ${email}`);
+    return this.wait(undefined);
+  }
 }
 
 export const db = new CloudDatabaseService();
