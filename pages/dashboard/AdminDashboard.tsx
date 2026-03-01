@@ -523,7 +523,6 @@ const AdminDashboard: React.FC = () => {
                             <input
                               type="url"
                               placeholder="e.g. https://drive.google.com/file/d/..."
-                              required={!editingId}
                               className="w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-lg px-4 py-3 text-slate-900 dark:text-white"
                               value={newProduct.fileData || ''}
                               onChange={(e) => setNewProduct({ ...newProduct, fileData: e.target.value, fileName: 'External Link', fileSize: 'N/A' })}
