@@ -51,8 +51,21 @@ class CloudDatabaseService {
   }
 
   private load<T>(key: string, defaultData: T): T {
-    const stored = localStorage.getItem(`tallypro_${key}`);
-    return stored ? JSON.parse(stored) : defaultData;
+    try {
+      const stored = localStorage.getItem(`tallypro_${key}`);
+      if (!stored) return defaultData;
+
+      const parsed = JSON.parse(stored);
+      // Ensure we don't accidentally load non-arrays into array fields if quota errors corrupted it
+      if (Array.isArray(defaultData) && !Array.isArray(parsed)) {
+        console.warn(`[MockDB] Corrupted data for ${key}, falling back to default.`);
+        return defaultData;
+      }
+      return parsed;
+    } catch (e) {
+      console.error(`[MockDB] Error parsing ${key} from localStorage, falling back to default.`, e);
+      return defaultData;
+    }
   }
 
   private save(key: string, data: any) {
@@ -65,11 +78,11 @@ class CloudDatabaseService {
 
   // --- Products ---
   async getProducts(): Promise<TDLProduct[]> {
-    return this.wait(this.products);
+    return this.wait(this.products || []);
   }
 
   subscribeProducts(callback: (products: TDLProduct[]) => void): () => void {
-    callback(this.products);
+    callback(this.products || []);
     return () => { };
   }
 
@@ -91,7 +104,7 @@ class CloudDatabaseService {
 
   // --- Users & Auth ---
   async getUsers(): Promise<User[]> {
-    return this.wait(this.users);
+    return this.wait(this.users || []);
   }
 
   async getUserByEmail(email: string): Promise<User | undefined> {
@@ -263,21 +276,21 @@ class CloudDatabaseService {
   }
 
   async getRevenue(): Promise<number> {
-    const revenue = this.orders.reduce((sum, ord) => ord.status === 'success' ? sum + ord.amount : sum, 0);
+    const revenue = (this.orders || []).reduce((sum, ord) => ord.status === 'success' ? sum + (ord.amount || 0) : sum, 0);
     return this.wait(revenue);
   }
 
   async getOrders(): Promise<Order[]> {
-    return this.wait(this.orders);
+    return this.wait(this.orders || []);
   }
 
   // --- Tickets ---
   async getTickets(): Promise<Ticket[]> {
-    return this.wait(this.tickets);
+    return this.wait(this.tickets || []);
   }
 
   subscribeTickets(callback: (tickets: Ticket[]) => void): () => void {
-    callback(this.tickets);
+    callback(this.tickets || []);
     return () => { };
   }
 
@@ -303,11 +316,11 @@ class CloudDatabaseService {
 
   // --- Feedbacks ---
   async getFeedbacks(): Promise<Feedback[]> {
-    return this.wait(this.feedbacks);
+    return this.wait(this.feedbacks || []);
   }
 
   subscribeFeedbacks(callback: (feedbacks: Feedback[]) => void): () => void {
-    callback(this.feedbacks);
+    callback(this.feedbacks || []);
     return () => { };
   }
 
