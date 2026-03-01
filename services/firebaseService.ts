@@ -109,23 +109,35 @@ export class FirebaseDatabaseService {
         try {
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
             // Fetch extra user details from Firestore
-            const user = await this.getUserById(userCredential.user.uid);
+            let user = await this.getUserById(userCredential.user.uid);
 
-            if (user) {
-                // Secure Admin Whitelist (Email Only)
-                // We rely on Firebase Auth to verify their password securely.
-                const adminEmails = [
-                    import.meta.env.VITE_ADMIN1_EMAIL,
-                    import.meta.env.VITE_ADMIN2_EMAIL
-                ].filter(Boolean).map(e => e?.toLowerCase());
+            const adminEmails = [
+                import.meta.env.VITE_ADMIN1_EMAIL,
+                import.meta.env.VITE_ADMIN2_EMAIL
+            ].filter(Boolean).map(e => e?.toLowerCase());
 
-                if (adminEmails.includes(email.toLowerCase())) {
-                    user.role = 'super_admin';
-                }
+            const isAdmin = adminEmails.includes(email.toLowerCase());
+
+            // Auto-create Admin Document if missing
+            if (!user && isAdmin) {
+                user = {
+                    id: userCredential.user.uid,
+                    name: 'Admin',
+                    email: email,
+                    role: 'super_admin',
+                    status: 'active',
+                    joinedAt: new Date().toISOString(),
+                    purchasedProducts: []
+                };
+                await setDoc(doc(db, "users", user.id), user);
+            }
+
+            if (user && isAdmin) {
+                user.role = 'super_admin'; // Enforce super_admin role
             }
 
             return user;
-        } catch (error) {
+        } catch (error: any) {
             console.error("Login error:", error);
             // Show error so UI can react (like auth/user-not-found)
             throw error;
