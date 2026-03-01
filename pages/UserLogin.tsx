@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 
@@ -90,6 +91,11 @@ const UserLogin: React.FC = () => {
 
     return (
         <div className="min-h-screen pt-32 pb-20 px-4 flex items-center justify-center bg-slate-50 dark:bg-dark">
+            <Helmet>
+                <title>Secure Login | AndurilTech</title>
+                <meta name="description" content="Log in to access your downloaded Tally TDLs, manage your profile, and receive updates from AndurilTech." />
+                <link rel="canonical" href="https://www.anduriltech.in/login" />
+            </Helmet>
             <div className="w-full max-w-md glass-card p-8 rounded-3xl border border-slate-200 dark:border-white/10 shadow-2xl animate-fade-in-up">
                 <div className="text-center mb-8">
                     <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">

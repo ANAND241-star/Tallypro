@@ -47,6 +47,7 @@ const Home: React.FC = () => {
       <Helmet>
         <title>Best Tally TDL Developer & Tailored Accounts Automation | AndurilTech</title>
         <meta name="description" content="Discover India's best Tally TDL developer for custom Tally Prime addons, Auto-GST Reconciliation, WhatsApp integrations, and specialized accounting solutions." />
+        <link rel="canonical" href="https://www.anduriltech.in/" />
       </Helmet>
 
       {/* 1. HERO SECTION */}

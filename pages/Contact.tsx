@@ -50,8 +50,9 @@ const Contact: React.FC = () => {
   return (
     <div className="pt-32 pb-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto bg-slate-50 dark:bg-dark transition-colors min-h-screen">
       <Helmet>
-        <title>Contact the Best Tally TDL Developer | AndurilTech</title>
-        <meta name="description" content="Get in touch for custom Tally ERP and Prime addons, support, or general inquiries. We respond within 1 hour." />
+        <title>Contact Us - Tally TDL Support | AndurilTech</title>
+        <meta name="description" content="Contact AndurilTech for custom Tally TDL requirements, support, or general inquiries." />
+        <link rel="canonical" href="https://www.anduriltech.in/contact" />
       </Helmet>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">

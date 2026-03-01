@@ -172,6 +172,7 @@ const Products: React.FC = () => {
       <Helmet>
         <title>Premium Tally Prime Addons & Custom TDLs | AndurilTech</title>
         <meta name="description" content="Browse our collection of premium Tally Prime addons, including Auto-GST Reconciliation, WhatsApp Integration, and Smart Inventory modules." />
+        <link rel="canonical" href="https://www.anduriltech.in/products" />
       </Helmet>
 
       {/* Header */}
