@@ -6,7 +6,7 @@ import Footer from './components/Footer';
 import Home from './pages/Home';
 import Products from './pages/Products';
 import Contact from './pages/Contact';
-import OTPLogin from './pages/OTPLogin';
+import UserLogin from './pages/UserLogin';
 import AdminLogin from './pages/AdminLogin';
 import UserDashboard from './pages/dashboard/UserDashboard';
 import AdminDashboard from './pages/dashboard/AdminDashboard';
@@ -60,8 +60,8 @@ const App: React.FC = () => {
                       <Route path="/cart" element={<Cart />} />
                       <Route path="/contact" element={<Contact />} />
 
-                      <Route path="/login" element={<OTPLogin />} />
-                      <Route path="/otp-login" element={<OTPLogin />} />
+                      <Route path="/login" element={<UserLogin />} />
+                      <Route path="/otp-login" element={<UserLogin />} />
                       <Route path="/admin-login" element={<AdminLogin />} />
                       <Route path="/dashboard" element={
                         <ProtectedRoute>

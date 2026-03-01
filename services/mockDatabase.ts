@@ -1,6 +1,6 @@
 
 import { TDL_PRODUCTS } from '../constants';
-import { User, TDLProduct, Order, Ticket, Feedback, OTP } from '../types';
+import { User, TDLProduct, Order, Ticket, Feedback } from '../types';
 
 // Initial Data Seeds
 const INITIAL_USERS: User[] = [
@@ -358,71 +358,17 @@ class CloudDatabaseService {
     });
   }
 
-  // --- OTP Authentication (Mock Implementation) ---
-  private otps: OTP[] = [];
-
-  async generateOTP(email: string): Promise<string> {
-    // Generate 6-digit OTP
-    const code = Math.floor(100000 + Math.random() * 900000).toString();
-    const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString(); // 10 minutes
-
-    // Delete any existing unused OTPs for this email
-    this.otps = this.otps.filter(otp => !(otp.email === email && !otp.used));
-
-    // Create new OTP
-    const newOTP: OTP = {
-      id: 'otp_' + Date.now().toString(36),
-      email,
-      code,
-      expiresAt,
-      used: false
-    };
-
-    this.otps.push(newOTP);
-
-    // Mock email sending
-    console.log(`Mock OTP ${code} sent to ${email}`);
-
-    return code;
-  }
-
-  async validateOTP(email: string, code: string): Promise<boolean> {
-    const otp = this.otps.find(
-      o => o.email === email && o.code === code && !o.used && new Date() <= new Date(o.expiresAt)
-    );
-
-    if (!otp) {
-      return false;
-    }
-
-    // Mark OTP as used
-    otp.used = true;
-    return true;
-  }
-
-  async sendOTPEmail(email: string, code: string): Promise<void> {
-    // Mock email sending
-    console.log(`Mock OTP Email: Your verification code is ${code}. Valid for 10 minutes.`);
-    return this.wait(undefined);
-  }
-
-  async loginWithOTP(email: string, code: string): Promise<User | null> {
-    const isValid = await this.validateOTP(email, code);
-
-    if (!isValid) {
-      return null;
-    }
-
-    // Find or create user
+  // --- Google Authentication (Mock Implementation) ---
+  async loginWithGoogle(): Promise<User | null> {
+    const email = 'mockgoogleuser@example.com';
     let user = await this.getUserByEmail(email);
 
     if (!user) {
-      // Create new user with OTP login
       const newUser: User = {
         id: 'usr_' + Date.now().toString(36),
         name: email.split('@')[0],
         email,
-        password: '', // No password for OTP users
+        password: '',
         role: 'customer',
         status: 'active',
         joinedAt: new Date().toISOString(),

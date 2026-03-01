@@ -13,8 +13,7 @@ interface AuthContextType {
   isAdmin: boolean;
   needsFeedback: boolean;
   setNeedsFeedback: (val: boolean) => void;
-  loginWithOTP: (email: string, code: string) => Promise<boolean>;
-  generateOTP: (email: string) => Promise<string>;
+  loginWithGoogle: () => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -130,9 +129,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.removeItem('anduriltech_session');
   };
 
-  const loginWithOTP = async (email: string, code: string): Promise<boolean> => {
+  const loginWithGoogle = async (): Promise<boolean> => {
     try {
-      const dbUser = await db.loginWithOTP(email, code);
+      const dbUser = await db.loginWithGoogle();
       if (dbUser) {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { password: _, ...safeUser } = dbUser as any;
@@ -143,13 +142,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
       return false;
     } catch (error) {
-      console.error('OTP login error:', error);
+      console.error('Google login error:', error);
       return false;
     }
-  };
-
-  const generateOTP = async (email: string): Promise<string> => {
-    return await db.generateOTP(email);
   };
 
   return (
@@ -163,8 +158,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       isAdmin: user?.role === 'super_admin' || user?.role === 'admin',
       needsFeedback,
       setNeedsFeedback,
-      loginWithOTP,
-      generateOTP
+      loginWithGoogle
     }}>
       {children}
     </AuthContext.Provider>
