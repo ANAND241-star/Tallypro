@@ -106,68 +106,29 @@ export class FirebaseDatabaseService {
 
     // Replaces "verifyCredentials" - actually logs in
     async login(email: string, password: string): Promise<User | null> {
-        // --- ADMIN BYPASS: Read credentials from environment variables (not hardcoded) ---
-        const ADMIN_ACCOUNTS = [
-            {
-                email: import.meta.env.VITE_ADMIN1_EMAIL,
-                password: import.meta.env.VITE_ADMIN1_PASS,
-                name: 'Super Admin', id: 'admin_1', role: 'super_admin' as const
-            },
-            {
-                email: import.meta.env.VITE_ADMIN2_EMAIL,
-                password: import.meta.env.VITE_ADMIN2_PASS,
-                name: 'Admin', id: 'admin_2', role: 'admin' as const
-            },
-        ].filter(a => a.email && a.password); // Only include if env vars are set
-
-        const adminMatch = ADMIN_ACCOUNTS.find(
-            a => a.email.toLowerCase() === email.toLowerCase() && a.password === password
-        );
-        if (adminMatch) {
-            try {
-                // Also sign in to Firebase Auth so Firestore rules pass
-                try {
-                    await signInWithEmailAndPassword(auth, email, password);
-                } catch (e: any) {
-                    if (e.code === 'auth/user-not-found' || e.code === 'auth/invalid-credential') {
-                        const userCred = await createUserWithEmailAndPassword(auth, email, password);
-                        await setDoc(doc(db, "users", userCred.user.uid), {
-                            id: userCred.user.uid,
-                            name: adminMatch.name,
-                            email: adminMatch.email,
-                            role: adminMatch.role,
-                            status: 'active',
-                            joinedAt: new Date().toISOString(),
-                            purchasedProducts: []
-                        });
-                    } else {
-                        throw e;
-                    }
-                }
-            } catch (err) {
-                console.error("Admin Firebase Auth Error:", err);
-            }
-
-            return {
-                id: adminMatch.id,
-                name: adminMatch.name,
-                email: adminMatch.email,
-                role: adminMatch.role,
-                status: 'active',
-                joinedAt: '2023-01-01',
-                purchasedProducts: []
-            };
-        }
-        // --- END ADMIN BYPASS ---
-
         try {
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
             // Fetch extra user details from Firestore
             const user = await this.getUserById(userCredential.user.uid);
+
+            if (user) {
+                // Secure Admin Whitelist (Email Only)
+                // We rely on Firebase Auth to verify their password securely.
+                const adminEmails = [
+                    import.meta.env.VITE_ADMIN1_EMAIL,
+                    import.meta.env.VITE_ADMIN2_EMAIL
+                ].filter(Boolean).map(e => e?.toLowerCase());
+
+                if (adminEmails.includes(email.toLowerCase())) {
+                    user.role = 'super_admin';
+                }
+            }
+
             return user;
         } catch (error) {
             console.error("Login error:", error);
-            return null;
+            // Show error so UI can react (like auth/user-not-found)
+            throw error;
         }
     }
 
