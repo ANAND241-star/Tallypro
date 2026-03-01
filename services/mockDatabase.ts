@@ -67,10 +67,10 @@ class CloudDatabaseService {
   async getProducts(): Promise<TDLProduct[]> {
     return this.wait(this.products);
   }
-  
+
   subscribeProducts(callback: (products: TDLProduct[]) => void): () => void {
     callback(this.products);
-    return () => {};
+    return () => { };
   }
 
   async addProduct(product: TDLProduct): Promise<TDLProduct> {
@@ -275,10 +275,10 @@ class CloudDatabaseService {
   async getTickets(): Promise<Ticket[]> {
     return this.wait(this.tickets);
   }
-  
+
   subscribeTickets(callback: (tickets: Ticket[]) => void): () => void {
     callback(this.tickets);
-    return () => {};
+    return () => { };
   }
 
   async createTicket(userId: string, subject: string, priority: 'low' | 'medium' | 'high'): Promise<Ticket> {
@@ -305,10 +305,10 @@ class CloudDatabaseService {
   async getFeedbacks(): Promise<Feedback[]> {
     return this.wait(this.feedbacks);
   }
-  
+
   subscribeFeedbacks(callback: (feedbacks: Feedback[]) => void): () => void {
     callback(this.feedbacks);
-    return () => {};
+    return () => { };
   }
 
   async createFeedback(userName: string, userEmail: string, rating: number, comment: string): Promise<Feedback> {
@@ -328,15 +328,20 @@ class CloudDatabaseService {
   // Stub for file upload compatibility
   async uploadFile(file: File, path: string, onProgress?: (progress: number) => void): Promise<string> {
     return new Promise((resolve) => {
-      const reader = new FileReader();
-      reader.onprogress = (e) => {
-        if (e.lengthComputable && onProgress) onProgress((e.loaded / e.total) * 100);
-      };
-      reader.onloadend = () => {
-        if (onProgress) onProgress(100);
-        resolve(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+      // Simulate fake upload delay
+      let progress = 0;
+      const interval = setInterval(() => {
+        progress += 20;
+        if (onProgress) onProgress(progress);
+        if (progress >= 100) {
+          clearInterval(interval);
+          // Return a blob URL instead of Base64 to prevent localStorage QuotaExceeded errors
+          // Note: Blob URLs are session-only and will break on page reload, 
+          // but they keep the mock app functional without memory bloat.
+          const url = URL.createObjectURL(file);
+          resolve(url);
+        }
+      }, 200);
     });
   }
 
@@ -347,10 +352,10 @@ class CloudDatabaseService {
     // Generate 6-digit OTP
     const code = Math.floor(100000 + Math.random() * 900000).toString();
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString(); // 10 minutes
-    
+
     // Delete any existing unused OTPs for this email
     this.otps = this.otps.filter(otp => !(otp.email === email && !otp.used));
-    
+
     // Create new OTP
     const newOTP: OTP = {
       id: 'otp_' + Date.now().toString(36),
@@ -359,45 +364,45 @@ class CloudDatabaseService {
       expiresAt,
       used: false
     };
-    
+
     this.otps.push(newOTP);
-    
+
     // Mock email sending
     console.log(`Mock OTP ${code} sent to ${email}`);
-    
+
     return code;
   }
-  
+
   async validateOTP(email: string, code: string): Promise<boolean> {
     const otp = this.otps.find(
       o => o.email === email && o.code === code && !o.used && new Date() <= new Date(o.expiresAt)
     );
-    
+
     if (!otp) {
       return false;
     }
-    
+
     // Mark OTP as used
     otp.used = true;
     return true;
   }
-  
+
   async sendOTPEmail(email: string, code: string): Promise<void> {
     // Mock email sending
     console.log(`Mock OTP Email: Your verification code is ${code}. Valid for 10 minutes.`);
     return this.wait(undefined);
   }
-  
+
   async loginWithOTP(email: string, code: string): Promise<User | null> {
     const isValid = await this.validateOTP(email, code);
-    
+
     if (!isValid) {
       return null;
     }
-    
+
     // Find or create user
     let user = await this.getUserByEmail(email);
-    
+
     if (!user) {
       // Create new user with OTP login
       const newUser: User = {
@@ -410,12 +415,12 @@ class CloudDatabaseService {
         joinedAt: new Date().toISOString(),
         purchasedProducts: []
       };
-      
+
       this.users.push(newUser);
       this.save('users', this.users);
       user = newUser;
     }
-    
+
     return user;
   }
 }

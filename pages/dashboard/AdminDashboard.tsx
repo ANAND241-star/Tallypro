@@ -42,8 +42,8 @@ const AdminDashboard: React.FC = () => {
   });
   const [loadingFile, setLoadingFile] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const [, setMainFile] = useState<File | null>(null);
-  const [, setDemoFile] = useState<File | null>(null);
+  const [mainFile, setMainFile] = useState<File | null>(null);
+  const [demoFile, setDemoFile] = useState<File | null>(null);
 
   // Fetch Data
   useEffect(() => {
@@ -86,49 +86,32 @@ const AdminDashboard: React.FC = () => {
     };
   }, []);
 
-  // Helper to read file to Base64
+  // Helper to prepare file for upload
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, field: 'main' | 'demo') => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Size limit check (1MB) - Firestore Doc Limit
-    if (file.size > 1 * 1024 * 1024) {
-      showToast("File size too large. Maximum 1MB allowed for Database storage.", "error");
+    // Size limit check (100MB) - For cloud storage
+    if (file.size > 100 * 1024 * 1024) {
+      showToast("File size too large. Maximum 100MB allowed.", "error");
       e.target.value = '';
       return;
     }
 
-    setLoadingFile(true);
-    const reader = new FileReader();
-
-    reader.onloadend = () => {
-      const base64Data = reader.result as string;
-      if (field === 'main') {
-        setMainFile(file);
-        setNewProduct(prev => ({
-          ...prev,
-          fileName: file.name,
-          fileSize: (file.size / 1024).toFixed(2) + ' KB',
-          fileData: base64Data
-        }));
-      } else {
-        setDemoFile(file);
-        setNewProduct(prev => ({
-          ...prev,
-          demoFileName: file.name,
-          demoFileData: base64Data
-        }));
-      }
-      setLoadingFile(false);
-      showToast("File processed successfully", "success");
-    };
-
-    reader.onerror = () => {
-      showToast("Error reading file", "error");
-      setLoadingFile(false);
-    };
-
-    reader.readAsDataURL(file);
+    if (field === 'main') {
+      setMainFile(file);
+      setNewProduct(prev => ({
+        ...prev,
+        fileName: file.name,
+        fileSize: (file.size / 1024).toFixed(2) + ' KB',
+      }));
+    } else {
+      setDemoFile(file);
+      setNewProduct(prev => ({
+        ...prev,
+        demoFileName: file.name,
+      }));
+    }
   };
 
   const handleEditProduct = (product: TDLProduct) => {
@@ -143,22 +126,29 @@ const AdminDashboard: React.FC = () => {
     e.preventDefault();
     if (newProduct.name && newProduct.price) {
       setLoadingFile(true);
+      setUploadProgress(0);
       try {
-        let mainFileUrl = newProduct.fileData; // Keeping base64 or link
+        let mainFileUrl = newProduct.fileData; // Previous link if editing
         let demoFileUrl = newProduct.demoFileData;
 
-        // Note: No Firebase Storage upload needed for Spark Plan.
-        // Files are already converted to Base64 in handleFileUpload and stored in newProduct.
+        if (mainFile) {
+          mainFileUrl = await db.uploadFile(mainFile, `products/main_${Date.now()}_${mainFile.name}`, (progress) => {
+            setUploadProgress(progress);
+          });
+        }
+
+        if (demoFile) {
+          demoFileUrl = await db.uploadFile(demoFile, `products/demo_${Date.now()}_${demoFile.name}`);
+        }
 
         const productData = {
           ...newProduct,
-          fileData: mainFileUrl,
-          demoFileData: demoFileUrl,
+          fileData: mainFileUrl || '',
+          demoFileData: demoFileUrl || '',
           fileName: newProduct.fileName || 'External Link',
           fileSize: newProduct.fileSize || 'N/A',
           demoFileName: newProduct.demoFileName || '',
           updatedAt: new Date().toISOString()
-          // Ensure we don't accidentally save base64 if it was ever there, though we removed that logic
         };
 
         if (editingId) {
