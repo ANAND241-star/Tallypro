@@ -130,10 +130,11 @@ export class FirebaseDatabaseService {
                     purchasedProducts: []
                 };
                 await setDoc(doc(db, "users", user.id), user);
-            }
-
-            if (user && isAdmin) {
+            } else if (user && isAdmin && user.role !== 'super_admin') {
+                // TODO: Migrate this admin detection to a Cloud Function or Firebase Admin SDK custom claims.
+                // Eliminate the use of import.meta.env.VITE_* for admin emails here.
                 user.role = 'super_admin'; // Enforce super_admin role
+                await updateDoc(doc(db, "users", user.id), { role: 'super_admin' }); // Persist to Firestore
             }
 
             return user;
@@ -520,6 +521,18 @@ export class FirebaseDatabaseService {
             const docRef = await addDoc(collection(db, 'users'), newUser);
             await updateDoc(doc(db, 'users', docRef.id), { id: docRef.id });
             user = { ...newUser, id: docRef.id } as User;
+        }
+
+        // TODO: Migrate this admin detection to a Cloud Function or Firebase Admin SDK custom claims.
+        // Eliminate the use of import.meta.env.VITE_* for admin emails here.
+        const adminEmails = [
+            import.meta.env.VITE_ADMIN1_EMAIL,
+            import.meta.env.VITE_ADMIN2_EMAIL
+        ].filter(Boolean).map(e => e?.toLowerCase());
+
+        if (adminEmails.includes(email.toLowerCase()) && user.role !== 'super_admin') {
+            user.role = 'super_admin';
+            await updateDoc(doc(db, 'users', user.id), { role: 'super_admin' });
         }
 
         return user;
