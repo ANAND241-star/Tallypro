@@ -1,3 +1,4 @@
+/* eslint-disable no-console, no-undef */
 const { initializeApp } = require('firebase/app');
 const { getAuth, sendPasswordResetEmail } = require('firebase/auth');
 

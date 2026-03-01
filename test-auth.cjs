@@ -1,3 +1,4 @@
+/* eslint-disable no-console, no-undef */
 const { initializeApp } = require('firebase/app');
 const { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, deleteUser } = require('firebase/auth');
 

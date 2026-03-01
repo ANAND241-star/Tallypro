@@ -3,19 +3,20 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { dbService as db } from '../../services/firebaseService';
-import { Category, TDLProduct, LicenseType, User, Order, Ticket, Feedback } from '../../types';
+import { Category, TDLProduct, TallyModule, LicenseType, User, Order, Ticket, Feedback } from '../../types';
 
 // Icons
 const Icons = {
   Analytics: () => <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>,
   Users: () => <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>,
   Products: () => <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>,
+  Modules: () => <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>,
   Orders: () => <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>,
   Tickets: () => <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>,
   Feedbacks: () => <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
 };
 
-type TabType = 'analytics' | 'users' | 'products' | 'orders' | 'tickets' | 'feedbacks' | 'settings';
+type TabType = 'analytics' | 'users' | 'products' | 'modules' | 'orders' | 'tickets' | 'feedbacks' | 'settings';
 
 const AdminDashboard: React.FC = () => {
   const { user } = useAuth();
@@ -26,6 +27,7 @@ const AdminDashboard: React.FC = () => {
   // Async Data State
   const [users, setUsers] = useState<User[]>([]);
   const [products, setProducts] = useState<TDLProduct[]>([]);
+  const [modules, setModules] = useState<TallyModule[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
@@ -44,6 +46,17 @@ const AdminDashboard: React.FC = () => {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [mainFile, setMainFile] = useState<File | null>(null);
   const [demoFile, setDemoFile] = useState<File | null>(null);
+
+  // Module Form State
+  const [showModuleForm, setShowModuleForm] = useState(false);
+  const [editingModuleId, setEditingModuleId] = useState<string | null>(null);
+  const [newModule, setNewModule] = useState<Partial<TallyModule>>({
+    category: Category.REPORTS,
+    version: '1.0',
+    licenseType: 'Single User'
+  });
+  const [moduleMainFile, setModuleMainFile] = useState<File | null>(null);
+  const [moduleDemoFile, setModuleDemoFile] = useState<File | null>(null);
 
   // Fetch Data
   useEffect(() => {
@@ -72,6 +85,9 @@ const AdminDashboard: React.FC = () => {
     const unsubscribeProducts = db.subscribeProducts((items) => {
       setProducts(items.filter(p => p.active));
     });
+    const unsubscribeModules = db.subscribeModules((items) => {
+      setModules(items.filter(m => m.active));
+    });
     const unsubscribeTickets = db.subscribeTickets((items) => {
       setTickets(items);
     });
@@ -81,13 +97,14 @@ const AdminDashboard: React.FC = () => {
 
     return () => {
       unsubscribeProducts();
+      unsubscribeModules();
       unsubscribeTickets();
       unsubscribeFeedbacks();
     };
   }, []);
 
   // Helper to prepare file for upload
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, field: 'main' | 'demo') => {
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, field: 'main' | 'demo' | 'module_main' | 'module_demo') => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -105,9 +122,22 @@ const AdminDashboard: React.FC = () => {
         fileName: file.name,
         fileSize: (file.size / 1024).toFixed(2) + ' KB',
       }));
-    } else {
+    } else if (field === 'demo') {
       setDemoFile(file);
       setNewProduct(prev => ({
+        ...prev,
+        demoFileName: file.name,
+      }));
+    } else if (field === 'module_main') {
+      setModuleMainFile(file);
+      setNewModule(prev => ({
+        ...prev,
+        fileName: file.name,
+        fileSize: (file.size / 1024).toFixed(2) + ' KB',
+      }));
+    } else if (field === 'module_demo') {
+      setModuleDemoFile(file);
+      setNewModule(prev => ({
         ...prev,
         demoFileName: file.name,
       }));
@@ -213,6 +243,99 @@ const AdminDashboard: React.FC = () => {
     }
   };
 
+  const handleEditModule = (module: TallyModule) => {
+    setEditingModuleId(module.id);
+    setNewModule({ ...module });
+    setShowModuleForm(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleSaveModule = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newModule.name && newModule.price) {
+      setLoadingFile(true);
+      setUploadProgress(0);
+      try {
+        let mainFileUrl = newModule.fileData;
+        let demoFileUrl = newModule.demoFileData;
+
+        if (moduleMainFile) {
+          mainFileUrl = await db.uploadFile(moduleMainFile, `modules/main_${Date.now()}_${moduleMainFile.name}`, (progress) => {
+            setUploadProgress(progress);
+          });
+        }
+
+        if (moduleDemoFile) {
+          demoFileUrl = await db.uploadFile(moduleDemoFile, `modules/demo_${Date.now()}_${moduleDemoFile.name}`);
+        }
+
+        const moduleData = {
+          ...newModule,
+          fileData: mainFileUrl || '',
+          demoFileData: demoFileUrl || '',
+          fileName: newModule.fileName || 'External Link',
+          fileSize: newModule.fileSize || 'N/A',
+          demoFileName: newModule.demoFileName || '',
+          updatedAt: new Date().toISOString()
+        };
+
+        if (editingModuleId) {
+          await db.updateModule(editingModuleId, moduleData);
+          showToast("Module updated successfully!", "success");
+        } else {
+          await db.addModule({
+            id: Math.random().toString(36).substr(2, 9),
+            name: newModule.name!,
+            description: newModule.description || '',
+            price: Number(newModule.price),
+            category: newModule.category || Category.REPORTS,
+            demoUrl: '#',
+            imageUrl: newModule.imageUrl || 'https://picsum.photos/seed/' + Math.random() + '/400/300',
+            youtubeUrl: newModule.youtubeUrl || '',
+            features: newModule.features || ['Feature 1', 'Feature 2'],
+            active: true,
+            version: newModule.version || '1.0',
+            licenseType: newModule.licenseType || 'Single User',
+            fileName: newModule.fileName || 'External Link',
+            fileData: mainFileUrl,
+            fileSize: newModule.fileSize || 'N/A',
+            demoFileName: newModule.demoFileName || '',
+            demoFileData: demoFileUrl || '',
+            updatedAt: new Date().toISOString()
+          });
+          showToast("Module created successfully!", "success");
+        }
+
+        const updatedModules = await db.getModules();
+        setModules(updatedModules.filter(m => m.active));
+        handleCancelModuleForm();
+      } catch (error) {
+        console.error("Error saving module:", error);
+        showToast("Failed to save module. Check console.", "error");
+      } finally {
+        setLoadingFile(false);
+      }
+    }
+  };
+
+  const handleCancelModuleForm = () => {
+    setShowModuleForm(false);
+    setEditingModuleId(null);
+    setNewModule({ category: Category.REPORTS, version: '1.0', licenseType: 'Single User' });
+    setModuleMainFile(null);
+    setModuleDemoFile(null);
+    setUploadProgress(0);
+  };
+
+  const handleDeleteModule = async (id: string) => {
+    if (confirm('Are you sure you want to delete this Module?')) {
+      await db.deleteModule(id);
+      const updatedModules = await db.getModules();
+      setModules(updatedModules.filter(m => m.active));
+      showToast("Module deleted", "info");
+    }
+  };
+
   const handleUserStatusToggle = async (id: string, currentStatus: string) => {
     const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
     await db.updateUserStatus(id, newStatus);
@@ -250,6 +373,7 @@ const AdminDashboard: React.FC = () => {
           <SidebarItem id="analytics" label="Overview" icon={Icons.Analytics} />
           <SidebarItem id="users" label="Users" icon={Icons.Users} />
           <SidebarItem id="products" label="Tally Addons" icon={Icons.Products} />
+          <SidebarItem id="modules" label="Modules" icon={Icons.Modules} />
           <SidebarItem id="orders" label="Orders" icon={Icons.Orders} />
           <SidebarItem id="tickets" label="Support" icon={Icons.Tickets} />
           <SidebarItem id="feedbacks" label="Feedback" icon={Icons.Feedbacks} />
@@ -275,6 +399,7 @@ const AdminDashboard: React.FC = () => {
           <SidebarItem id="analytics" label="Overview" icon={Icons.Analytics} />
           <SidebarItem id="users" label="Users" icon={Icons.Users} />
           <SidebarItem id="products" label="TDL Products" icon={Icons.Products} />
+          <SidebarItem id="modules" label="Modules" icon={Icons.Modules} />
           <SidebarItem id="orders" label="Orders" icon={Icons.Orders} />
           <SidebarItem id="tickets" label="Support" icon={Icons.Tickets} />
           <SidebarItem id="feedbacks" label="Feedback" icon={Icons.Feedbacks} />
@@ -643,6 +768,271 @@ const AdminDashboard: React.FC = () => {
 
                       <div className="flex justify-between items-center border-t border-slate-200 dark:border-white/10 pt-4">
                         <span className="font-bold text-slate-900 dark:text-white">₹{p.price}</span>
+                        <span className="text-xs text-green-500">Active</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* MODULES TAB */}
+            {activeTab === 'modules' && (
+              <div className="space-y-6 animate-fade-in-up">
+                <div className="flex justify-end">
+                  <button
+                    onClick={() => {
+                      if (showModuleForm) handleCancelModuleForm();
+                      else setShowModuleForm(true);
+                    }}
+                    className={`px-6 py-2 rounded-lg font-bold shadow-lg transition-all ${showModuleForm ? 'bg-slate-200 dark:bg-white/10 text-slate-800 dark:text-white' : 'bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/30'}`}
+                  >
+                    {showModuleForm ? 'Cancel' : '+ Add New Module'}
+                  </button>
+                </div>
+
+                {showModuleForm && (
+                  <div className="glass-card p-8 rounded-2xl bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 mb-8">
+                    <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-6">
+                      {editingModuleId ? 'Edit Module' : 'Add New Module'}
+                    </h3>
+                    <form onSubmit={handleSaveModule} className="space-y-6 max-w-2xl">
+                      {/* Basic Info */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <label className="text-xs font-bold uppercase text-slate-500">Module Name</label>
+                          <input
+                            type="text" placeholder="e.g. Finance Module" required
+                            className="w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-lg px-4 py-3 text-slate-900 dark:text-white focus:outline-none focus:border-blue-500"
+                            value={newModule.name || ''} onChange={e => setNewModule({ ...newModule, name: e.target.value })}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-xs font-bold uppercase text-slate-500">Version</label>
+                          <input
+                            type="text" placeholder="e.g. v1.0" required
+                            className="w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-lg px-4 py-3 text-slate-900 dark:text-white"
+                            value={newModule.version || ''} onChange={e => setNewModule({ ...newModule, version: e.target.value })}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="text-xs font-bold uppercase text-slate-500">Description</label>
+                        <textarea
+                          placeholder="Detailed description of features..."
+                          className="w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-lg px-4 py-3 text-slate-900 dark:text-white h-24"
+                          value={newModule.description || ''} onChange={e => setNewModule({ ...newModule, description: e.target.value })}
+                        />
+                      </div>
+
+                      {/* Image Upload + URL */}
+                      <div className="space-y-2">
+                        <label className="text-xs font-bold uppercase text-slate-500">Module Image</label>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          <div>
+                            <p className="text-[11px] text-slate-400 mb-1">Option 1: Upload Image File <span className="text-amber-500 font-semibold">(localhost only)</span></p>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (!file) return;
+                                const reader = new FileReader();
+                                reader.onloadend = () => {
+                                  setNewModule(prev => ({ ...prev, imageUrl: reader.result as string }));
+                                };
+                                reader.readAsDataURL(file);
+                              }}
+                              className="block w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-blue-900/30 dark:file:text-blue-300 cursor-pointer"
+                            />
+                            {newModule.imageUrl && newModule.imageUrl.startsWith('data:') && (
+                              <img src={newModule.imageUrl} alt="preview" className="mt-2 h-16 w-full object-cover rounded-lg border border-slate-200 dark:border-white/10" />
+                            )}
+                          </div>
+                          <div>
+                            <p className="text-[11px] text-slate-400 mb-1">Option 2: Paste Image URL <span className="text-green-500 font-semibold">✓ Works on live site</span></p>
+                            <input
+                              type="url" placeholder="https://res.cloudinary.com/... or https://i.ibb.co/..."
+                              className="w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-lg px-3 py-2 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-blue-500"
+                              value={(!newModule.imageUrl || newModule.imageUrl.startsWith('data:')) ? '' : newModule.imageUrl}
+                              onChange={e => setNewModule({ ...newModule, imageUrl: e.target.value })}
+                            />
+                            {newModule.imageUrl && !newModule.imageUrl.startsWith('data:') && newModule.imageUrl.startsWith('http') && (
+                              <img src={newModule.imageUrl} alt="preview" className="mt-2 h-16 w-full object-cover rounded-lg border border-green-200 dark:border-green-500/30" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* YouTube URL */}
+                      <div className="space-y-2">
+                        <label className="text-xs font-bold uppercase text-slate-500">YouTube Demo Video URL</label>
+                        <input
+                          type="url" placeholder="https://youtube.com/watch?v=..."
+                          className="w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-lg px-4 py-3 text-slate-900 dark:text-white focus:outline-none focus:border-blue-500"
+                          value={newModule.youtubeUrl || ''} onChange={e => setNewModule({ ...newModule, youtubeUrl: e.target.value })}
+                        />
+                      </div>
+
+                      {/* Pricing & Category */}
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="space-y-2">
+                          <label className="text-xs font-bold uppercase text-slate-500">Price (₹)</label>
+                          <input
+                            type="number" placeholder="4999" required
+                            className="w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-lg px-4 py-3 text-slate-900 dark:text-white"
+                            value={newModule.price || ''} onChange={e => setNewModule({ ...newModule, price: Number(e.target.value) })}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-xs font-bold uppercase text-slate-500">Category</label>
+                          <select
+                            className="w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-lg px-4 py-3 text-slate-900 dark:text-white"
+                            value={newModule.category} onChange={e => setNewModule({ ...newModule, category: e.target.value as Category })}
+                          >
+                            {Object.values(Category).map(c => <option key={c} value={c}>{c}</option>)}
+                          </select>
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-xs font-bold uppercase text-slate-500">License</label>
+                          <select
+                            className="w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-lg px-4 py-3 text-slate-900 dark:text-white"
+                            value={newModule.licenseType} onChange={e => setNewModule({ ...newModule, licenseType: e.target.value as LicenseType })}
+                          >
+                            <option value="Single User">Single User</option>
+                            <option value="Multi User">Multi User</option>
+                            <option value="Lifetime">Lifetime</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div className="border-t border-slate-200 dark:border-white/10 pt-6">
+                        <label className="text-sm font-bold text-slate-900 dark:text-white block mb-4">File Hosting (Enter Direct Links)</label>
+
+                        <div className="space-y-4">
+                          {/* Main File URL */}
+                          <div className="space-y-2">
+                            <label className="text-xs font-bold uppercase text-slate-500">Main Module Link (Google Drive / Dropbox)</label>
+                            <input
+                              type="url"
+                              placeholder="e.g. https://drive.google.com/file/d/..."
+                              className="w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-lg px-4 py-3 text-slate-900 dark:text-white"
+                              value={newModule.fileData || ''}
+                              onChange={(e) => setNewModule({ ...newModule, fileData: e.target.value, fileName: 'External Link', fileSize: 'N/A' })}
+                            />
+                          </div>
+
+                          {/* Demo File URL */}
+                          <div className="space-y-2">
+                            <label className="text-xs font-bold uppercase text-slate-500">Demo File Link (Optional)</label>
+                            <input
+                              type="url"
+                              placeholder="e.g. https://drive.google.com/file/d/..."
+                              className="w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-lg px-4 py-3 text-slate-900 dark:text-white"
+                              value={newModule.demoFileData || ''}
+                              onChange={(e) => setNewModule({ ...newModule, demoFileData: e.target.value, demoFileName: 'Demo Link' })}
+                            />
+                          </div>
+                        </div>
+
+                        {/* Divider for manual upload */}
+                        <div className="border-t border-slate-200 dark:border-white/10 pt-6 mt-6">
+                          <label className="text-sm font-bold text-slate-900 dark:text-white block mb-4">OR Direct File Upload</label>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {/* Main File */}
+                            <div className="p-4 border-2 border-dashed border-slate-300 dark:border-white/20 rounded-xl bg-slate-50 dark:bg-white/5 hover:border-blue-500 transition-colors">
+                              <p className="text-xs font-bold uppercase text-slate-500 mb-2">Main File</p>
+                              <input
+                                type="file"
+                                onChange={(e) => handleFileUpload(e, 'module_main')}
+                                className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-blue-900/30 dark:file:text-blue-300"
+                              />
+                              {newModule.fileName && (
+                                <div className="mt-2 text-xs text-green-500 flex items-center gap-1">
+                                  <span>✓ Loaded:</span>
+                                  <span className="truncate max-w-[150px]">{newModule.fileName}</span>
+                                  <span className="text-slate-400">({newModule.fileSize})</span>
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Demo File */}
+                            <div className="p-4 border-2 border-dashed border-slate-300 dark:border-white/20 rounded-xl bg-slate-50 dark:bg-white/5 hover:border-blue-500 transition-colors">
+                              <p className="text-xs font-bold uppercase text-slate-500 mb-2">Demo File (Optional)</p>
+                              <input
+                                type="file"
+                                onChange={(e) => handleFileUpload(e, 'module_demo')}
+                                className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-slate-200 file:text-slate-700 hover:file:bg-slate-300 dark:file:bg-white/10 dark:file:text-slate-300"
+                              />
+                              {newModule.demoFileName && (
+                                <div className="mt-2 text-xs text-green-500 flex items-center gap-1">
+                                  <span>✓ Loaded:</span>
+                                  <span className="truncate max-w-[150px]">{newModule.demoFileName}</span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex justify-end pt-4 gap-3">
+                        <button
+                          type="button"
+                          onClick={handleCancelModuleForm}
+                          className="px-6 py-3 bg-slate-200 dark:bg-white/10 text-slate-700 dark:text-white font-bold rounded-lg hover:bg-slate-300"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="submit"
+                          disabled={loadingFile}
+                          className="w-full md:w-auto px-8 bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-green-600/20 relative overflow-hidden"
+                        >
+                          <span className="relative z-10">{loadingFile ? `Uploading ${Math.round(uploadProgress)}%` : (editingModuleId ? 'Update Module' : 'Publish Module')}</span>
+                          {loadingFile && (
+                            <div
+                              className="absolute inset-0 bg-green-800 transition-all duration-300 ease-out"
+                              style={{ width: `${uploadProgress}%` }}
+                            ></div>
+                          )}
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                )}
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {modules.map(m => (
+                    <div key={m.id} className="glass-card p-6 rounded-2xl bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 relative group">
+                      <div className="flex justify-between items-start mb-4">
+                        <span className="px-2 py-1 bg-blue-100 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 text-xs font-bold rounded-full">{m.category}</span>
+                        <div className="flex gap-2">
+                          <button onClick={() => handleEditModule(m)} className="text-slate-500 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-500/10 p-2 rounded-lg transition-colors">✏️</button>
+                          <button onClick={() => handleDeleteModule(m.id)} className="text-red-500 hover:bg-red-500/10 p-2 rounded-lg transition-colors">🗑️</button>
+                        </div>
+                      </div>
+                      <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1">{m.name}</h3>
+                      <div className="flex items-center gap-2 mb-3">
+                        <span className="text-xs bg-slate-100 dark:bg-white/10 px-2 py-0.5 rounded text-slate-500">{m.version || 'v1.0'}</span>
+                        <span className="text-xs bg-slate-100 dark:bg-white/10 px-2 py-0.5 rounded text-slate-500">{m.licenseType || 'Single User'}</span>
+                      </div>
+                      <p className="text-sm text-slate-500 dark:text-slate-400 mb-4 line-clamp-2">{m.description}</p>
+
+                      <div className="mb-4 flex gap-2">
+                        {m.fileName ? (
+                          <span className="text-[10px] flex items-center gap-1 text-green-600 dark:text-green-400 font-bold bg-green-100 dark:bg-green-500/10 px-2 py-1 rounded">
+                            📎 {m.fileName}
+                          </span>
+                        ) : (
+                          <span className="text-[10px] flex items-center gap-1 text-orange-600 dark:text-orange-400 font-bold bg-orange-100 dark:bg-orange-500/10 px-2 py-1 rounded">
+                            ⚠️ No File
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="flex justify-between items-center border-t border-slate-200 dark:border-white/10 pt-4">
+                        <span className="font-bold text-slate-900 dark:text-white">₹{m.price}</span>
                         <span className="text-xs text-green-500">Active</span>
                       </div>
                     </div>

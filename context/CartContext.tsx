@@ -1,10 +1,10 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { CartItem, TDLProduct } from '../types';
+import { CartItem, TDLProduct, TallyModule } from '../types';
 
 interface CartContextType {
     cartItems: CartItem[];
-    addToCart: (product: TDLProduct) => void;
+    addToCart: (product: TDLProduct | TallyModule) => void;
     removeFromCart: (productId: string) => void;
     clearCart: () => void;
     isInCart: (productId: string) => boolean;
@@ -30,7 +30,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cartItems));
     }, [cartItems]);
 
-    const addToCart = useCallback((product: TDLProduct) => {
+    const addToCart = useCallback((product: TDLProduct | TallyModule) => {
         setCartItems(prev => {
             const existing = prev.find(item => item.product.id === product.id);
             if (existing) {

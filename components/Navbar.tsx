@@ -24,6 +24,7 @@ const Navbar: React.FC = () => {
   const navLinks = [
     { name: 'Home', path: '/' },
     { name: 'Tally Addons', path: '/products' },
+    { name: 'Modules', path: '/modules' },
     { name: 'Contact', path: '/contact' },
   ];
 

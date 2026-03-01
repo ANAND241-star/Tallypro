@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { dbService as db } from '../../services/firebaseService';
-import { TDLProduct, Ticket } from '../../types';
+import { TDLProduct, Ticket, TallyModule } from '../../types';
 
 type DashboardTab = 'downloads' | 'support' | 'settings';
 
@@ -26,7 +26,7 @@ const UserDashboard: React.FC = () => {
   const [passwords, setPasswords] = useState({ current: '', new: '', confirm: '' });
 
   // Async Data State
-  const [myProducts, setMyProducts] = useState<TDLProduct[]>([]);
+  const [myItems, setMyItems] = useState<(TDLProduct | TallyModule)[]>([]);
   const [myTickets, setMyTickets] = useState<Ticket[]>([]);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
@@ -40,31 +40,49 @@ const UserDashboard: React.FC = () => {
   useEffect(() => {
     if (!user) return;
     setLoading(true);
-    const unsubscribeProducts = db.subscribeProducts((items) => {
-      setMyProducts(items.filter(p => user.purchasedProducts?.includes(p.id)));
+
+    let products: TDLProduct[] = [];
+    let modules: TallyModule[] = [];
+
+    const updateItems = () => {
+      const purchasedProducts = products.filter(p => user.purchasedProducts?.includes(p.id));
+      const purchasedModules = modules.filter(m => user.purchasedProducts?.includes(m.id));
+      setMyItems([...purchasedProducts, ...purchasedModules]);
       setLoading(false);
+    };
+
+    const unsubscribeProducts = db.subscribeProducts((items) => {
+      products = items;
+      updateItems();
     });
+
+    const unsubscribeModules = db.subscribeModules((items) => {
+      modules = items;
+      updateItems();
+    });
+
     const unsubscribeTickets = db.subscribeTickets((items) => {
       setMyTickets(items.filter(t => t.userId === user.id));
     });
 
     return () => {
       unsubscribeProducts();
+      unsubscribeModules();
       unsubscribeTickets();
     };
   }, [user, activeTab]);
 
-  const handleDownload = (product: TDLProduct) => {
-    if (product.fileData && product.fileName) {
+  const handleDownload = (item: TDLProduct | TallyModule) => {
+    if (item.fileData && item.fileName) {
       const link = document.createElement('a');
-      link.href = product.fileData;
-      link.download = product.fileName;
+      link.href = item.fileData;
+      link.download = item.fileName;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      showToast(`Downloading ${product.fileName}...`, "success");
+      showToast(`Downloading ${item.fileName}...`, "success");
     } else {
-      showToast(`Download started for ${product.name} (Demo Mock)`, "info");
+      showToast(`Download started for ${item.name} (Demo Mock)`, "info");
     }
   };
 
@@ -173,7 +191,7 @@ const UserDashboard: React.FC = () => {
                 : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:border-slate-300'
                 }`}
             >
-              {tab === 'downloads' && `My Downloads (${myProducts.length})`}
+              {tab === 'downloads' && `My Downloads (${myItems.length})`}
               {tab === 'support' && `Support Tickets (${myTickets.filter(t => t.status !== 'closed').length})`}
               {tab === 'settings' && 'Account Settings'}
             </button>
@@ -183,22 +201,22 @@ const UserDashboard: React.FC = () => {
         {/* --- DOWNLOADS TAB --- */}
         {activeTab === 'downloads' && (
           <div className="animate-fade-in-up">
-            {myProducts.length > 0 ? (
+            {myItems.length > 0 ? (
               <div className="grid grid-cols-1 gap-4">
-                {myProducts.map(product => (
-                  <div key={product.id} className="glass-card p-6 rounded-2xl border border-slate-200 dark:border-white/10 flex flex-col md:flex-row items-center justify-between gap-6 bg-white dark:bg-white/5">
+                {myItems.map(item => (
+                  <div key={item.id} className="glass-card p-6 rounded-2xl border border-slate-200 dark:border-white/10 flex flex-col md:flex-row items-center justify-between gap-6 bg-white dark:bg-white/5">
                     <div className="flex items-center gap-6 w-full md:w-auto">
                       <div className="w-16 h-16 rounded-xl bg-slate-100 dark:bg-slate-800 overflow-hidden flex-shrink-0">
-                        <img src={product.imageUrl} alt={product.name} loading="lazy" className="w-full h-full object-cover" />
+                        <img src={item.imageUrl} alt={item.name} loading="lazy" className="w-full h-full object-cover" />
                       </div>
                       <div>
-                        <h3 className="text-lg font-bold text-slate-900 dark:text-white">{product.name}</h3>
+                        <h3 className="text-lg font-bold text-slate-900 dark:text-white">{item.name}</h3>
                         <div className="flex flex-wrap gap-2 mt-1">
                           <span className="text-xs bg-slate-100 dark:bg-white/10 px-2 py-0.5 rounded text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-white/5">
-                            Ver: {product.version || '1.0'}
+                            Ver: {item.version || '1.0'}
                           </span>
                           <span className="text-xs bg-blue-50 dark:bg-blue-900/20 px-2 py-0.5 rounded text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-500/20">
-                            {product.licenseType || 'Standard'} License
+                            {item.licenseType || 'Standard'} License
                           </span>
                         </div>
                       </div>
@@ -208,11 +226,11 @@ const UserDashboard: React.FC = () => {
                         Installation Guide
                       </button>
                       <button
-                        onClick={() => handleDownload(product)}
+                        onClick={() => handleDownload(item)}
                         className="flex-1 md:flex-none px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-600/20 transition-colors flex items-center justify-center gap-2 text-sm font-bold"
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-                        Download TDL
+                        Download
                       </button>
                     </div>
                   </div>
@@ -221,8 +239,11 @@ const UserDashboard: React.FC = () => {
             ) : (
               <div className="text-center py-24 bg-slate-100 dark:bg-white/5 rounded-3xl border-2 border-dashed border-slate-300 dark:border-white/10">
                 <div className="text-4xl mb-4">📂</div>
-                <p className="text-slate-500 dark:text-slate-400 mb-6 font-medium">You haven't purchased any TDLs yet.</p>
-                <Link to="/products" className="px-6 py-3 bg-blue-600 text-white rounded-xl font-bold shadow-lg hover:bg-blue-700 transition-all">Browse Marketplace</Link>
+                <p className="text-slate-500 dark:text-slate-400 mb-6 font-medium">You haven't purchased any TDLs or Modules yet.</p>
+                <div className="flex justify-center gap-4">
+                  <Link to="/products" className="px-6 py-3 bg-blue-600 text-white rounded-xl font-bold shadow-lg hover:bg-blue-700 transition-all">Browse Products</Link>
+                  <Link to="/modules" className="px-6 py-3 bg-indigo-600 text-white rounded-xl font-bold shadow-lg hover:bg-indigo-700 transition-all">Browse Modules</Link>
+                </div>
               </div>
             )}
           </div>

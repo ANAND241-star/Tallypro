@@ -1,0 +1,38 @@
+﻿
+C:\Users\pjat9\Downloads\Tallypro-main (1)\Tallypro-main\pages\ModuleDetails.tsx
+  5:10  warning  'useAuth' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\pjat9\Downloads\Tallypro-main (1)\Tallypro-main\test-auth.cjs
+   2:1   warning  Unused eslint-disable directive (no problems were reported from 'no-console')
+  23:5   error    'console' is not defined                                                       no-undef
+  26:9   error    'console' is not defined                                                       no-undef
+  28:9   error    'console' is not defined                                                       no-undef
+  30:9   error    'console' is not defined                                                       no-undef
+  32:9   error    'console' is not defined                                                       no-undef
+  34:9   error    'console' is not defined                                                       no-undef
+  38:13  error    'console' is not defined                                                       no-undef
+  41:9   error    'console' is not defined                                                       no-undef
+  43:9   error    'console' is not defined                                                       no-undef
+  46:9   error    'console' is not defined                                                       no-undef
+  48:9   error    'console' is not defined                                                       no-undef
+  51:9   error    'console' is not defined                                                       no-undef
+
+C:\Users\pjat9\Downloads\Tallypro-main (1)\Tallypro-main\test-email.cjs
+   2:1  warning  Unused eslint-disable directive (no problems were reported from 'no-console')
+  20:5  error    'console' is not defined                                                       no-undef
+  23:9  error    'console' is not defined                                                       no-undef
+  24:9  error    'console' is not defined                                                       no-undef
+  26:9  error    'console' is not defined                                                       no-undef
+
+C:\Users\pjat9\Downloads\Tallypro-main (1)\Tallypro-main\test-providers.cjs
+   2:1   warning  Unused eslint-disable directive (no problems were reported from 'no-console')
+  20:5   error    'console' is not defined                                                       no-undef
+  23:9   error    'console' is not defined                                                       no-undef
+  25:13  error    'console' is not defined                                                       no-undef
+  27:13  error    'console' is not defined                                                       no-undef
+  31:13  error    'console' is not defined                                                       no-undef
+  33:13  error    'console' is not defined                                                       no-undef
+
+Γ£û 26 problems (22 errors, 4 warnings)
+  0 errors and 3 warnings potentially fixable with the `--fix` option.
+

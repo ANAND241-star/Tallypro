@@ -36,6 +36,29 @@ export interface TDLProduct {
   updatedAt?: string;
 }
 
+export interface TallyModule {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  category: Category;
+  demoUrl: string;
+  imageUrl: string;
+  youtubeUrl?: string;
+  features: string[];
+  active: boolean; // For soft delete/hiding
+
+  // File Management
+  version?: string;
+  licenseType?: LicenseType;
+  fileName?: string;
+  fileData?: string; // Base64 encoded file content
+  fileSize?: string;
+  demoFileName?: string;
+  demoFileData?: string;
+  updatedAt?: string;
+}
+
 export interface Service {
   id: string;
   title: string;
@@ -104,7 +127,7 @@ export interface Ticket {
 }
 
 export interface CartItem {
-  product: TDLProduct;
+  product: TDLProduct | TallyModule;
   quantity: number;
 }
 

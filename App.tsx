@@ -5,6 +5,8 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Home from './pages/Home';
 import Products from './pages/Products';
+import Modules from './pages/Modules';
+import ModuleDetails from './pages/ModuleDetails';
 import Contact from './pages/Contact';
 import UserLogin from './pages/UserLogin';
 import AdminLogin from './pages/AdminLogin';
@@ -57,6 +59,8 @@ const App: React.FC = () => {
                     <Routes>
                       <Route path="/" element={<Home />} />
                       <Route path="/products" element={<Products />} />
+                      <Route path="/modules" element={<Modules />} />
+                      <Route path="/modules/:id" element={<ModuleDetails />} />
                       <Route path="/cart" element={<Cart />} />
                       <Route path="/contact" element={<Contact />} />
 

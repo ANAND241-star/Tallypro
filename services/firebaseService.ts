@@ -3,7 +3,6 @@ import {
     getDocs,
     addDoc,
     updateDoc,
-    deleteDoc,
     doc,
     query,
     where,
@@ -21,8 +20,7 @@ import {
 } from 'firebase/auth';
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { auth, db, storage } from './firebaseConfig';
-import { db as mockDb } from './mockDatabase';
-import { User, TDLProduct, Order, Ticket, Feedback } from '../types';
+import { User, TDLProduct, TallyModule, Order, Ticket, Feedback } from '../types';
 
 export class FirebaseDatabaseService {
 
@@ -74,6 +72,42 @@ export class FirebaseDatabaseService {
         // Let's stick to update to keep it consistent, strictly speaking the interface said deleteProduct
         // but the implementation did soft delete. Let's do soft delete to be safe.
         await this.updateProduct(id, { active: false });
+    }
+
+    // --- Modules ---
+    async getModules(): Promise<TallyModule[]> {
+        const querySnapshot = await getDocs(collection(db, "modules"));
+        const modules: TallyModule[] = [];
+        querySnapshot.forEach((doc) => {
+            modules.push({ id: doc.id, ...doc.data() } as TallyModule);
+        });
+        return modules;
+    }
+
+    subscribeModules(callback: (modules: TallyModule[]) => void): () => void {
+        return onSnapshot(collection(db, "modules"), (snapshot) => {
+            const modules: TallyModule[] = [];
+            snapshot.forEach((doc) => {
+                modules.push({ id: doc.id, ...doc.data() } as TallyModule);
+            });
+            callback(modules);
+        });
+    }
+
+    async addModule(moduleData: TallyModule): Promise<TallyModule> {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { id: _id, ...data } = moduleData;
+        const docRef = await addDoc(collection(db, "modules"), data);
+        return { id: docRef.id, ...data } as TallyModule;
+    }
+
+    async updateModule(id: string, updates: Partial<TallyModule>): Promise<void> {
+        const moduleRef = doc(db, "modules", id);
+        await updateDoc(moduleRef, updates);
+    }
+
+    async deleteModule(id: string): Promise<void> {
+        await this.updateModule(id, { active: false });
     }
 
     // --- Users & Auth ---
@@ -452,9 +486,4 @@ export class FirebaseDatabaseService {
     }
 }
 
-const hasFirebaseConfig =
-    !!import.meta.env.VITE_FIREBASE_API_KEY &&
-    !!import.meta.env.VITE_FIREBASE_PROJECT_ID &&
-    !!import.meta.env.VITE_FIREBASE_APP_ID;
-
-export const dbService = hasFirebaseConfig ? new FirebaseDatabaseService() : mockDb;
+export const dbService = new FirebaseDatabaseService();
