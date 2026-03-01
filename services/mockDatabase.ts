@@ -6,8 +6,7 @@ import { User, TDLProduct, Order, Ticket, Feedback } from '../types';
 const INITIAL_USERS: User[] = [
   { id: 'u1', name: 'Rajesh Kumar', email: 'user@tallypro.in', password: 'password123', role: 'customer', status: 'active', purchasedProducts: ['1'], joinedAt: '2023-11-15' },
   { id: 'u2', name: 'Amit Patel', email: 'amit@business.com', password: 'password123', role: 'customer', status: 'active', purchasedProducts: [], joinedAt: '2024-01-10' },
-  { id: 'admin_1', name: 'Super Admin', email: 'anandjatt689@gmail.com', password: 'Admin@123', role: 'super_admin', status: 'active', purchasedProducts: [], joinedAt: '2023-01-01' },
-  { id: 'admin_2', name: 'Admin', email: 'pjat95105@gmail.com', password: 'pawan900@#', role: 'admin', status: 'active', purchasedProducts: [], joinedAt: '2023-01-01' },
+  { id: 'admin_1', name: 'Super Admin', email: 'pjat95105@gmail.com', password: 'pawan90010', role: 'super_admin', status: 'active', purchasedProducts: [], joinedAt: '2023-01-01' },
 ];
 
 const INITIAL_ORDERS: Order[] = [
@@ -36,8 +35,7 @@ class CloudDatabaseService {
 
     // Always ensure admin users exist with correct credentials
     const admins = [
-      { id: 'admin_1', name: 'Super Admin', email: 'anandjatt689@gmail.com', password: 'Admin@123', role: 'super_admin' as const },
-      { id: 'admin_2', name: 'Admin', email: 'pjat95105@gmail.com', password: 'pawan900@#', role: 'admin' as const },
+      { id: 'admin_1', name: 'Super Admin', email: 'pjat95105@gmail.com', password: 'pawan90010', role: 'super_admin' as const },
     ];
     admins.forEach(admin => {
       const idx = this.users.findIndex(u => u.email === admin.email);
